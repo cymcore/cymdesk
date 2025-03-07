@@ -47,7 +47,7 @@ $PSNativeCommandUseErrorActionPreference = $true
 $WinAutoDir = "C:\cymauto"
 $LogName = "Application"
 $LogSource = "winauto"
-$GithubUrl = "https://raw.githubusercontent.com/ptimme01/desktop/refs/heads/main/windows/winauto/"
+$GithubUrl = "https://raw.githubusercontent.com/ptimme01/cymdesk/refs/heads/main/windows/apps/winauto/"
 $ScheduledTaskName = "WinAuto-Run"
 $DailyRunTime = "3am"
 $WinautoStage1File = "$WinAutoDir\winauto-stage1.ps1"
@@ -177,8 +177,11 @@ Function Install-WinAuto {
     }
 
     ## Create scheduled task
+
+    New-EventLogSource -logName $LogName -source $LogSource
+
     if (!(Get-ScheduledTask -TaskName $ScheduledTaskName -ErrorAction SilentlyContinue)) {
-        $Action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-ExecutionPolicy Bypass -File $WinautoStage1File"
+        $Action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-ExecutionPolicy Bypass -File $WinAutoDir\winauto.ps1 -action run"
         $Triggers = @(
             (New-ScheduledTaskTrigger -Daily -At $DailyRunTime),
             (New-EventLogTrigger -LogName $LogName -LogSource $LogSource -EventID 150)
@@ -239,17 +242,17 @@ Function Invoke-WinAutoRun {
     }
 
     ### Stage-1 script
-    write-host ("$(get-date) - stage1 starting") >> $LogFile
+    write-output ("$(get-date) - stage1 starting") >> $LogFile
     . $WinautoStage1File >> $LogFile
     ### Stage-2 script
     if ($PwshAvailable) {
-        write-host ("$(get-date) - stage2 starting") >> $LogFile
+        write-output ("$(get-date) - stage2 starting") >> $LogFile
         pwsh.exe -ExecutionPolicy Bypass -File $WinautoStage2File >> $LogFile
     } 
 
     ### Computer specific script
-    if (Test-Path -Path "$WinAutoDir\$env:COMPUTERNAME.ps1" -and $PwshAvailable) {
-        write-host ("$(get-date) - $env:COMPUTERNAME starting") >> $LogFile
+    if ((Test-Path -Path $WinAutoComputerFile) -and ($PwshAvailable)) {
+        write-output ("$(get-date) - $env:COMPUTERNAME starting") >> $LogFile
         pwsh.exe -ExecutionPolicy Bypass -File $WinAutoComputerFile >> $LogFile
     }
 
@@ -265,6 +268,7 @@ Function Uninstall-WinAuto {
 
     ## Delete scheduled task
     if (Get-ScheduledTask -TaskName $ScheduledTaskName -ErrorAction SilentlyContinue) {
+        Unregister-ScheduledTask -TaskName $ScheduledTaskName -Confirm:$false
 
     }
     New-EventLogEntry -LogName $LogName -LogSource $LogSource -LogEventID 106 -LogEntryType (Get-LogIdMetadata(106)).LogEntryType -LogMessage (Get-LogIdMetadata(106)).LogMessage
@@ -328,11 +332,7 @@ Function Update-WinAuto {
 
 }
 
-if (-not (Test-Admin)) {
-    New-EventLogEntry -LogName $LogName -LogSource $LogSource -LogEventID 305 -LogEntryType (Get-LogIdMetadata(305)).LogEntryType -LogMessage (Get-LogIdMetadata(305)).LogMessage
 
-    Throw "This script must be run as an administrator."
-}
 
 Function Main {
     switch ($Action) {
@@ -344,6 +344,13 @@ Function Main {
         default { write-host "Parameter Required: Run Get-Help" }
     }
     
+}
+
+
+if (-not (Test-Admin)) {
+    New-EventLogEntry -LogName $LogName -LogSource $LogSource -LogEventID 305 -LogEntryType (Get-LogIdMetadata(305)).LogEntryType -LogMessage (Get-LogIdMetadata(305)).LogMessage
+
+    Throw "This script must be run as an administrator."
 }
 
 if ($null -eq $MyInvocation.PSCommandPath) {
