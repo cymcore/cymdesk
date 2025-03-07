@@ -312,8 +312,8 @@ Function Get-AreTwoFilesSame {
 }
 
 Function Update-WinAuto {
-    ## Update winauto.ps1 file if needed
-    ### Download and compare winauto.ps1 files (if different tell the stage-1 script to swap them at the end)
+    ## Update winauto.ps1 file if needed (this gets executed at the end of the run action)
+    ### Download and compare winauto.ps1 files 
     if (test-path -Path "$WinAutoDir\winauto.ps1.new") { Remove-Item -Path "$WinAutoDir\winauto.ps1.new" }
     $RawUrl = "$GithubUrl/winauto.ps1"
     $OutputPath = "$WinAutoDir\winauto.ps1.new"
