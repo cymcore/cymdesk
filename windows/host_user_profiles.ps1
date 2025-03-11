@@ -1,5 +1,5 @@
 param (
-    [bool]$Init = $false
+    [switch]$Init
 )
 
 ### Error Handling
@@ -54,7 +54,7 @@ if ($HostUserProfile.GetType().Name -eq "Hashtable") {
             & $script.Value
         }
         catch {
-            Write-output "Error in $($script.Key): $_" -ForegroundColor Red > c:\cymlogs\host_user_profiles.ps1.error
+            Write-Error "Error in $($script.Key): $_" -ForegroundColor Red 
         }
     }
 
