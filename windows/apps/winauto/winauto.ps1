@@ -53,7 +53,7 @@ $DailyRunTime = "3am"
 $WinautoStage1File = "$WinAutoDir\winauto-stage1.ps1"
 $WinautoStage2File = "$WinAutoDir\winauto-stage2.ps1"
 $WinAutoComputerFile = "$WinAutoDir\$env:COMPUTERNAME.ps1"
-$LogFile = "$WinAutoDir\winauto.log"
+$LogFile = "c:\cymlogs\winauto.log"
 # Derived variables
 
 Function Test-Admin {
