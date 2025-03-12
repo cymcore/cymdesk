@@ -53,7 +53,7 @@ Function Install-WingetApp {
         [string]$Id,
         [string]$CustomArgs
     )
-    $DefaultArgs = "--accept-source-agreements --accept-package-agreements"
+    $DefaultArgs = "--accept-source-agreements --accept-package-agreements --silent"
     $CustomArgs = -join @($DefaultArgs, $CustomArgs)
  $WingetFilePath = "C:\Users\$($env:USERNAME)\AppData\Local\Microsoft\WindowsApps\winget.exe"
 
@@ -69,3 +69,39 @@ Function Install-WingetApp {
 # $CustomArgs = @"
 #  --override '/VERYSILENT /SP- /MERGETASKS="!runcode,!desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath"'
 # "@
+
+Function Get-AreTwoFilesSame {
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$File1,
+        [Parameter(Mandatory = $true)]
+        [string]$File2
+    )
+
+    $hash1 = Get-FileHash -Path $File1
+    $hash2 = Get-FileHash -Path $File2
+
+    return $hash1.Hash -eq $hash2.Hash
+}
+
+Function Get-WebFile {
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$RawUrl, 
+        
+        [Parameter(Mandatory = $true)]
+        [string]$OutputPath
+    )
+
+    Invoke-WebRequest -Uri $RawUrl -OutFile $OutputPath
+        
+
+}
+
+Function Test-Admin {
+
+    $currentUser = New-Object Security.Principal.WindowsPrincipal $([Security.Principal.WindowsIdentity]::GetCurrent())
+    $isAdmin = $currentUser.IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)
+ 
+    return $isAdmin
+}

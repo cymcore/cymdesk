@@ -18,6 +18,15 @@
     Trigger - Triggers the WinAuto service.
     Run - Runs the WinAuto service.
 
+.PARAMETER InstallLocation
+    Default: C:\cymauto
+    The directory where the WinAuto service will be installed.
+
+.PARAMETER CymdeskLocation
+    Default: C:\cymdesk
+    The directory where the cymdesk repository is located.
+    Cymdesk is a dependency of WinAuto.
+
 .INPUTS
     None
 
@@ -36,15 +45,16 @@
 
 param(
     [ValidateSet("Install", "Uninstall", "Update", "Trigger", "Run")]
-    [string]$Action
+    [string]$Action,
+    [string]$InstallLocation = "C:\cymauto",
+    [string]$CymdeskLocation = "C:\cymdesk"
 )
 
 # Error Handling
 $ErrorActionPreference = "Stop"
 $PSNativeCommandUseErrorActionPreference = $true
 
-# Defined variables
-$WinAutoDir = "C:\cymauto"
+# Defined Variables
 $LogName = "Application"
 $LogSource = "winauto"
 $GithubUrl = "https://raw.githubusercontent.com/ptimme01/cymdesk/refs/heads/main/windows/apps/winauto/"
@@ -54,111 +64,43 @@ $WinautoStage1File = "$WinAutoDir\winauto-stage1.ps1"
 $WinautoStage2File = "$WinAutoDir\winauto-stage2.ps1"
 $WinAutoComputerFile = "$WinAutoDir\$env:COMPUTERNAME.ps1"
 $LogFile = "c:\cymlogs\winauto.log"
-# Derived variables
 
-Function Test-Admin {
+# Derived Variables
+$WinAutoDir = $InstallLocation
 
-    $currentUser = New-Object Security.Principal.WindowsPrincipal $([Security.Principal.WindowsIdentity]::GetCurrent())
-    $isAdmin = $currentUser.IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)
- 
-    return $isAdmin
+# Source Dependent Scripts
+if ($env:CYMDESKPATH) {
+    $CymdeskLocation = $env:CYMDESKPATH
+}
+else {
+    # Set and refresh CYMDESKPATH environment variable
+    [System.Environment]::SetEnvironmentVariable('CYMDESKPATH', $CymdeskLocation, [System.EnvironmentVariableTarget]::Machine)
+    $env:CYMDESKPATH = [System.Environment]::GetEnvironmentVariable("CYMDESKPATH", "Machine")
 }
 
-Function New-EventLogSource {
-    param (
-        [Parameter(Mandatory = $true)]
-        [string]$logName,
-        [Parameter(Mandatory = $true)]
-        [string]$source
-    )
-    if (!(Test-Admin)) {
-        Throw "This script must be run as an administrator."
-    }
-    
-    if (-not [System.Diagnostics.EventLog]::SourceExists($source)) {
-        New-EventLog -LogName $logName -Source $source
-    }
+if (Test-Path -Path "$CymdeskLocation\windows\scripts\admin_functions.ps1") {
+    . "$CymdeskLocation\windows\scripts\admin_functions.ps1"
 }
-
-Function New-EventLogEntry {
-    param (
-        [Parameter(Mandatory = $true)]
-        [string]$LogName,
-        [Parameter(Mandatory = $true)]
-        [string]$LogSource,
-        [Parameter(Mandatory = $true)]
-        [int]$LogEventID,
-        [Parameter(Mandatory = $true)]
-        [string]$LogEntryType,
-        [Parameter(Mandatory = $true)]
-        [string]$LogMessage
-    )
-
-    # Check if the entry type is valid
-    if (-not (Test-ValidLogEntryType -EntryType $LogEntryType)) {
-        throw "Invalid entry type: $LogEntryType"
-    }
-    # Write the event to the log
-    Write-EventLog -LogName $LogName -Source $LogSource -EventID $LogEventID -EntryType $LogEntryType -Message $LogMessage
+else {
+    throw "cymdesk admin_functions.ps1 not found"
 }
-
-Function Test-ValidLogEntryType {
-    param (
-        [Parameter(Mandatory = $true)]
-        [string]$EntryType
-    )
-
-    # Define valid event log entry types
-    $validTypes = @("Information", "Warning", "Error", "SuccessAudit", "FailureAudit")
-
-    # Check if the input matches one of the valid types
-    return $validTypes -contains $EntryType
+if (Test-Path -Path "$CymdeskLocation\windows\scripts\user_functions.ps1") {
+    . "$CymdeskLocationwindows\scripts\user_functions.ps1"
 }
-
-Function Get-WebFile {
-    param (
-        [Parameter(Mandatory = $true)]
-        [string]$RawUrl, 
-        
-        [Parameter(Mandatory = $true)]
-        [string]$OutputPath
-    )
-
-    Invoke-WebRequest -Uri $RawUrl -OutFile $OutputPath
-        
-
-}
-
-Function New-EventLogTrigger {
-    param (
-        [Parameter(Mandatory = $true)]
-        [string]$LogName, 
-        [Parameter(Mandatory = $true)]
-        [string]$LogSource,
-        [Parameter(Mandatory = $true)]
-        [int]$EventID
-
-
-    )
-
-    # create TaskEventTrigger, use your own value in Subscription
-    $CIMTriggerClass = Get-CimClass -ClassName MSFT_TaskEventTrigger -Namespace Root/Microsoft/Windows/TaskScheduler:MSFT_TaskEventTrigger
-    $Trigger = New-CimInstance -CimClass $CIMTriggerClass -ClientOnly
-    $Trigger.Enabled = $True 
-    $Trigger.Subscription = @"
-<QueryList>
-    <Query Id="0" Path="$LogName">
-        <Select Path="$LogName">*[System[Provider[@Name="$LogSource"] and EventID=$EventID]]
-        </Select>
-    </Query>
-</QueryList>
-"@
-    return $Trigger
-
+else {
+    throw "cymdesk user_functions.ps1 not found"
 }
 
 Function Install-WinAuto {
-
+    if ($env:AUTOWINPATH) {
+        throw "WinAuto is already installed, uninstall first"
+    }
+ 
+    # Set and refresh AUTOWINPATH environment variable
+    [System.Environment]::SetEnvironmentVariable('AUTOWINPATH', $WinAutoDir, [System.EnvironmentVariableTarget]::Machine)
+    $env:AUTOWINPATH = [System.Environment]::GetEnvironmentVariable("AUTOWINPATH", "Machine")
+    
+    
     ## Create winauto base directory
     if (!(Test-Path -Path $WinAutoDir)) {
         New-Item -Path $WinAutoDir -ItemType Directory -Force
@@ -260,7 +202,11 @@ Function Invoke-WinAutoRun {
     Update-WinAuto
 }
 Function Uninstall-WinAuto {
-
+    ## Remove winauto environment variable
+    if ($env:AUTOWINPATH) {
+        [System.Environment]::SetEnvironmentVariable('AUTOWINPATH', $null, [System.EnvironmentVariableTarget]::Machine)
+        $env:AUTOWINPATH = [System.Environment]::GetEnvironmentVariable("AUTOWINPATH", [System.EnvironmentVariableTarget]::Machine)
+    }
     ## Delete winauto base directory
     if (Test-Path -Path $WinAutoDir) {
         Remove-Item -Path $WinAutoDir -Force -Recurse
@@ -297,20 +243,6 @@ Function Get-LogIdMetadata {
     return $LogIdTable[$LogEventID]
 }
 
-Function Get-AreTwoFilesSame {
-    param (
-        [Parameter(Mandatory = $true)]
-        [string]$File1,
-        [Parameter(Mandatory = $true)]
-        [string]$File2
-    )
-
-    $hash1 = Get-FileHash -Path $File1
-    $hash2 = Get-FileHash -Path $File2
-
-    return $hash1.Hash -eq $hash2.Hash
-}
-
 Function Update-WinAuto {
     ## Update winauto.ps1 file if needed (this gets executed at the end of the run action)
     ### Download and compare winauto.ps1 files 
@@ -331,9 +263,6 @@ Function Update-WinAuto {
     }
 
 }
-
-
-
 Function Main {
     switch ($Action) {
         "Install" { Install-WinAuto }
