@@ -47,6 +47,7 @@ Function Set-DnsServerAddresses {
         [array]$DNSServers
     
     )
+    $SingleNetInterfaceIndex = (Get-NetIPInterface | Where-Object { $_.AddressFamily -eq "Ipv4" -and $_.ifIndex -ne 1 }).ifIndex
     Set-DnsClientServerAddress -InterfaceIndex  $SingleNetInterfaceIndex -ServerAddresses $DNSServers 
 }
 

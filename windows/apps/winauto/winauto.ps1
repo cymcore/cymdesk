@@ -54,6 +54,35 @@ param(
 $ErrorActionPreference = "Stop"
 $PSNativeCommandUseErrorActionPreference = $true
 
+trap {
+    Show-ErrorAndStackTrace -ErrorRecord $_
+}
+
+# Function to log detailed error information, including stack trace
+Function Show-ErrorAndStackTrace {
+    param ([System.Management.Automation.ErrorRecord]$ErrorRecord)
+    $ErrorGuid = [guid]::NewGuid()
+    $ErrorDetails = @()
+    $TimeStamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+
+    $ErrorDetails += "ERROR_START_$ErrorGuid"
+    $ErrorDetails += "ERRORMSG: $($ErrorRecord.Exception.Message)"
+    $ErrorDetails += "SOURCE: $($ErrorRecord.InvocationInfo.ScriptName)"
+    $ErrorDetails += "LINENUMBER: $($ErrorRecord.InvocationInfo.ScriptLineNumber)"
+    $ErrorStackTrace = $ErrorRecord.ScriptStackTrace -split "`n"
+    foreach ($ErrorLine in $ErrorStackTrace) {
+        $ErrorDetails += "STACKTRACE: $ErrorLine"
+    }
+    $ErrorDetails += "ERROR_END_$ErrorGuid"
+   
+    foreach ($ErrorDetail in $ErrorDetails) {
+        Write-Host("$TimeStamp - $ErrorDetail")
+        if ($LogFile) {
+            "$TimeStamp - $ErrorDetail" | Out-File -FilePath $LogFile -Append
+        }
+    }
+}
+
 # Defined Variables
 $LogName = "Application"
 $LogSource = "winauto"
@@ -63,7 +92,7 @@ $DailyRunTime = "3am"
 $WinautoStage1File = "$WinAutoDir\winauto-stage1.ps1"
 $WinautoStage2File = "$WinAutoDir\winauto-stage2.ps1"
 $WinAutoComputerFile = "$WinAutoDir\$env:COMPUTERNAME.ps1"
-$LogFile = "c:\cymlogs\winauto.log"
+$LogFile = "c:\cymlogs\winauto.ps1.error"
 
 # Derived Variables
 $WinAutoDir = $InstallLocation
@@ -85,7 +114,7 @@ else {
     throw "cymdesk admin_functions.ps1 not found"
 }
 if (Test-Path -Path "$CymdeskLocation\windows\scripts\user_functions.ps1") {
-    . "$CymdeskLocationwindows\scripts\user_functions.ps1"
+    . "$CymdeskLocation\windows\scripts\user_functions.ps1"
 }
 else {
     throw "cymdesk user_functions.ps1 not found"
