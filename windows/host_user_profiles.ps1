@@ -70,19 +70,19 @@ $windev__sysadmin = @{
 
 
 
+
 ### Set HostUserProfile (depends on if called with -Init)
 if ($Init) {
     $HostUserProfile = get-variable -name "init__$($env:COMPUTERNAME.ToLower())__$($env:USERNAME.ToLower())" -ErrorAction SilentlyContinue -ValueOnly
 }
 else {
-    $HostUserProfile = (get-variable -name "$($env:COMPUTERNAME.ToLower())__$($env:USERNAME.ToLower())" -ErrorAction SilentlyContinue).Value
+    $HostUserProfile = get-variable -name "$($env:COMPUTERNAME.ToLower())__$($env:USERNAME.ToLower())" -ErrorAction SilentlyContinue -ValueOnly
 }
 
 ### Run functions
-if ($HostUserProfile.GetType().Name -eq "Hashtable") {
+if ($null -ne $HostUserProfile -and $HostUserProfile -is [hashtable]) {
     foreach ($script in $HostUserProfile.GetEnumerator() | Sort-Object Key) {
             & $script.Value   
     }
 }
-
 
