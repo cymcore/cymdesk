@@ -57,12 +57,13 @@ $init__windev__sysadmin = @{
     220 = { Set-VirtualizationFeaturesAll }
     240 = { Install-Wsl -DistroName "Ubuntu-24.04" }
     300 = { Install-WingetApp -Id git.git -CustomArgs "--scope machine" }
-    800 = { powershell.exe -executionpolicy bypass -file $env:AUTOWINPATH\winauto.ps1 -action trigger} 
+    800 = { powershell.exe -executionpolicy bypass -file $env:AUTOWINPATH\winauto.ps1 -action trigger ; powershell.exe -executionpolicy bypass -command "Start-Sleep -Seconds 10"}
     900 = { Restart-Computer -Force }
 }
 
 $windev__sysadmin = @{
-    100 = { Set-LocalUserEnableAndPassword -UserName "sysadmin" }
+    100 = { if (!(Test-Admin)) { Throw "Must run with elevated privs" } }
+    110 = { Set-LocalUserEnableAndPassword -UserName "sysadmin" }
     200 = { New-LocalUserWithRandomPassword -UserName "ptimme01" -UserDescription "Paul Timmerman" }
     201 = { Set-LocalUserEnableAndPassword -UserName "ptimme01" }
 }
