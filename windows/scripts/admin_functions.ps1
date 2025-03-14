@@ -214,3 +214,11 @@ Function Set-EnviromentVariableMachine {
     )
     [System.Environment]::SetEnvironmentVariable($Name, $Value, [System.EnvironmentVariableTarget]::Machine)
 }
+
+Function Test-Admin {
+
+    $currentUser = New-Object Security.Principal.WindowsPrincipal $([Security.Principal.WindowsIdentity]::GetCurrent())
+    $isAdmin = $currentUser.IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)
+ 
+    return $isAdmin
+}
