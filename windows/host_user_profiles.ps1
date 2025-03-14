@@ -57,7 +57,7 @@ $init__windev__sysadmin = @{
     220 = { Set-VirtualizationFeaturesAll }
     240 = { Install-Wsl -DistroName "Ubuntu-24.04" }
     300 = { Install-WingetApp -Id git.git -CustomArgs "--scope machine" }
-    800 = { powershell -executionpolicy bypass -file $env:AUTOWINPATH\winauto.ps1 -action trigger} 
+    800 = { powershell.exe -executionpolicy bypass -file $env:AUTOWINPATH\winauto.ps1 -action trigger} 
     900 = { Restart-Computer -Force }
 }
 
