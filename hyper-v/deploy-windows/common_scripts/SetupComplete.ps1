@@ -48,7 +48,7 @@ New-Item -Path 'C:\Temp' -ItemType Directory
 # Download git portable, extract and install it, clone cymdesk repository, change permissions
 Invoke-WebRequest -Uri $GitPortableUrl -OutFile $GitSavedFile
 cmd /c "C:\Windows\Setup\Scripts\PortableGit.exe" -o"C:\Windows\Setup\Scripts\Git" -y
-cmd /c "cd C:\ && C:\Windows\Setup\Scripts\Git\bin\git.exe clone https://github.com/ptimme01/cymdesk.git"
+cmd /c "cd C:\ && C:\Windows\Setup\Scripts\Git\bin\git.exe clone https://github.com/cymcore/cymdesk.git"
 icacls c:\cymdesk /inheritance:d
 icacls c:\cymdesk /remove "Authenticated Users"
 

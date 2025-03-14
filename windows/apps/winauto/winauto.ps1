@@ -86,7 +86,7 @@ Function Show-ErrorAndStackTrace {
 # Defined Variables
 $LogName = "Application"
 $LogSource = "winauto"
-$GithubUrl = "https://raw.githubusercontent.com/ptimme01/cymdesk/refs/heads/main/windows/apps/winauto/"
+$GithubUrl = "https://raw.githubusercontent.com/cymcore/cymdesk/refs/heads/main/windows/apps/winauto/"
 $ScheduledTaskName = "WinAuto-Run"
 $DailyRunTime = "3am"
 $WinautoStage1File = "$WinAutoDir\winauto-stage1.ps1"
