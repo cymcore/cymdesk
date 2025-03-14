@@ -36,9 +36,9 @@ Function Test-WingetInstalledApp {
     )
     $WingetFilePath = "C:\Users\$($env:USERNAME)\AppData\Local\Microsoft\WindowsApps\winget.exe"
     
-    if (!(test-path -path $WingetFilePath)){throw "Winget is not installed"}
+    if (!(test-path -path $WingetFilePath)) { throw "Winget is not installed" }
 
-    $process = Start-Process -FilePath $WingetFilePath -Wait -NoNewWindow -PassThru -ArgumentList "list --id $Id"
+    $process = Start-Process -FilePath $WingetFilePath -Wait -NoNewWindow -PassThru -ArgumentList "list --id $Id --accept-source-agreements"
 
     if ($process.ExitCode -eq 0) {
         return $true
@@ -54,9 +54,9 @@ Function Install-WingetApp {
         [string]$CustomArgs
     )
     $DefaultArgs = "--accept-source-agreements --accept-package-agreements --silent"
-    $CustomArgs = -join @($DefaultArgs, $CustomArgs)
- $WingetFilePath = "C:\Users\$($env:USERNAME)\AppData\Local\Microsoft\WindowsApps\winget.exe"
-
+    $CustomArgs = $DefaultArgs, $CustomArgs -join " "
+    $WingetFilePath = "C:\Users\$($env:USERNAME)\AppData\Local\Microsoft\WindowsApps\winget.exe"
+ 
     if (-not (Test-WingetInstalledApp -Id $Id)) {
         $process = Start-Process -FilePath $WingetFilePath -Wait -NoNewWindow -PassThru -ArgumentList "install --id $Id $CustomArgs"
         if ($process.ExitCode -ne 0) {
