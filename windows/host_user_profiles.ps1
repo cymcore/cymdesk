@@ -37,6 +37,7 @@ Function Show-ErrorAndStackTrace {
 
 ### Defined variables
 $LogFile = "c:\cymlogs\host_user_profiles.ps1.error"
+
 ### Derived variables
 
 ### Custom
@@ -66,6 +67,7 @@ $windev__sysadmin = @{
     110 = { Set-LocalUserEnableAndPassword -UserName "sysadmin" }
     200 = { New-LocalUserWithRandomPassword -UserName "ptimme01" -UserDescription "Paul Timmerman" }
     201 = { Set-LocalUserEnableAndPassword -UserName "ptimme01" }
+    210 = {Add-LocalUserRdpGroup -UserName "ptimme01"}
 }
 
 
