@@ -97,7 +97,7 @@ Function Add-LocalUserRdpGroup {
 
     )
 
-    Add-LocalGroupMember -Group "Remote Desktop Users" -Member $UserName
+    Add-LocalGroupMember -Group "Remote Desktop Users" -Member $UserName -ErrorAction SilentlyContinue
 }
 
 function Set-LocalUserEnableAndPassword {
