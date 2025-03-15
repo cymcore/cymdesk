@@ -72,6 +72,7 @@ $windev__sysadmin = @{
     200 = { New-LocalUserWithRandomPassword -UserName "ptimme01" -UserDescription "Paul Timmerman" }
     201 = { Set-LocalUserEnableAndPassword -UserName "ptimme01" }
     210 = { Add-LocalUserRdpGroup -UserName "ptimme01" }
+    300 = { Install-WingetApp -Id microsoft.visualstudiocode -CustomArgs "--override ""/VERYSILENT /SP- /MERGETASKS='!runcode,!desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath\'""" }
 }
 
 
