@@ -215,18 +215,15 @@ Function Invoke-WinAutoRun {
     }
 
     ### Stage-1 script
-    write-output ("$(get-date) - stage1 starting") >> $LogFile
-    . $WinautoStage1File >> $LogFile
+    . $WinautoStage1File
     ### Stage-2 script
     if ($PwshAvailable) {
-        write-output ("$(get-date) - stage2 starting") >> $LogFile
-        pwsh.exe -ExecutionPolicy Bypass -File $WinautoStage2File >> $LogFile
+        pwsh.exe -ExecutionPolicy Bypass -File $WinautoStage2File
     } 
 
     ### Computer specific script
     if ((Test-Path -Path $WinAutoComputerFile) -and ($PwshAvailable)) {
-        write-output ("$(get-date) - $env:COMPUTERNAME starting") >> $LogFile
-        pwsh.exe -ExecutionPolicy Bypass -File $WinAutoComputerFile >> $LogFile
+        pwsh.exe -ExecutionPolicy Bypass -File $WinAutoComputerFile
     }
 
     New-EventLogEntry -LogName $LogName -LogSource $LogSource -LogEventID 110 -LogEntryType (Get-LogIdMetadata(110)).LogEntryType -LogMessage (Get-LogIdMetadata(110)).LogMessage
