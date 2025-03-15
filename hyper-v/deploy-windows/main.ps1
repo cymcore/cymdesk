@@ -22,6 +22,8 @@ Function Show-ErrorAndStackTrace {
     $ErrorDetails += "ERRORMSG: $($ErrorRecord.Exception.Message)"
     $ErrorDetails += "SOURCE: $($ErrorRecord.InvocationInfo.ScriptName)"
     $ErrorDetails += "LINENUMBER: $($ErrorRecord.InvocationInfo.ScriptLineNumber)"
+    $ErrorDetails += "LINEDETAIL: $($ErrorRecord.InvocationInfo.Line)"
+    $ErrorDetails += "STATEMENT: $($ErrorRecord.InvocationInfo.Statement)"
     $ErrorStackTrace = $ErrorRecord.ScriptStackTrace -split "`n"
     foreach ($ErrorLine in $ErrorStackTrace) {
         $ErrorDetails += "STACKTRACE: $ErrorLine"

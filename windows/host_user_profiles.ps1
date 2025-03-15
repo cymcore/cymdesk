@@ -21,6 +21,8 @@ Function Show-ErrorAndStackTrace {
     $ErrorDetails += "ERRORMSG: $($ErrorRecord.Exception.Message)"
     $ErrorDetails += "SOURCE: $($ErrorRecord.InvocationInfo.ScriptName)"
     $ErrorDetails += "LINENUMBER: $($ErrorRecord.InvocationInfo.ScriptLineNumber)"
+    $ErrorDetails += "LINEDETAIL: $($ErrorRecord.InvocationInfo.Line)"
+    $ErrorDetails += "STATEMENT: $($ErrorRecord.InvocationInfo.Statement)"
     $ErrorStackTrace = $ErrorRecord.ScriptStackTrace -split "`n"
     foreach ($ErrorLine in $ErrorStackTrace) {
         $ErrorDetails += "STACKTRACE: $ErrorLine"
@@ -54,6 +56,7 @@ $init__windev__sysadmin = @{
     120 = { Set-DnsServerAddresses -DNSServers "192.168.7.50, 8.8.8.8" }
     140 = { Set-RdpOn }
     160 = { New-LocalSmbShare -DirPath "C:\xfer" -ShareName "xfer" }
+    180 = { Set-ExecutionPolicy -Scope CurrentUser RemoteSigned }
     190 = { Set-AutoLogonCountFix }
     220 = { Set-VirtualizationFeaturesAll }
     240 = { Install-Wsl -DistroName "Ubuntu-24.04" }
@@ -68,7 +71,7 @@ $windev__sysadmin = @{
     110 = { Set-LocalUserEnableAndPassword -UserName "sysadmin" }
     200 = { New-LocalUserWithRandomPassword -UserName "ptimme01" -UserDescription "Paul Timmerman" }
     201 = { Set-LocalUserEnableAndPassword -UserName "ptimme01" }
-    210 = {Add-LocalUserRdpGroup -UserName "ptimme01"}
+    210 = { Add-LocalUserRdpGroup -UserName "ptimme01" }
 }
 
 
