@@ -18,9 +18,9 @@ Function New-LocalUserWithRandomPassword {
 
     $Password = Get-Random -Minimum 100000000000 -Maximum 999999999999
     $SecureStringPassword = ConvertTo-SecureString $Password -AsPlainText -Force
-    new-localuser -Description $UserDescription -PasswordNeverExpires -Password $SecureStringPassword -Name $UserName
+    new-localuser -Description $UserDescription -PasswordNeverExpires -Password $SecureStringPassword -Name $UserName -ErrorAction SilentlyContinue
     Disable-LocalUser -Name $UserName
-    Add-LocalGroupMember -Group Users -Member $UserName
+    Add-LocalGroupMember -Group Users -Member $UserName -ErrorAction SilentlyContinue
 }
 
 Function Set-StaticIpAddress {
@@ -73,13 +73,13 @@ Function New-LocalSmbShare {
         [string]$ShareName
     )
     if (!(Test-Path -Path $DirPath)) { New-Item -Path $DirPath -ItemType Directory }
-    New-SmbShare -Path $DirPath -Name $ShareName -FullAccess Everyone
-    Enable-NetFirewallRule -Name "FPS-SMB-In-TCP"
+    New-SmbShare -Path $DirPath -Name $ShareName -FullAccess Everyone -ErrorAction SilentlyContinue
+    Enable-NetFirewallRule -Name "FPS-SMB-In-TCP" -ErrorAction SilentlyContinue
 }
 
 Function Set-RdpOn {
     Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -name "fDenyTSConnections" -value 0
-    Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+    Enable-NetFirewallRule -DisplayGroup "Remote Desktop" -ErrorAction SilentlyContinue
 }
 
 Function Install-Wsl {
@@ -136,7 +136,7 @@ Function New-EventLogSource {
         [string]$source
     )
     if (!(Test-Admin)) {
-        Throw "This script must be run as an administrator."
+        Throw "This function must be run as an administrator."
     }
     
     if (-not [System.Diagnostics.EventLog]::SourceExists($source)) {
