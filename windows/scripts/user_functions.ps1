@@ -105,3 +105,28 @@ Function Test-Admin {
  
     return $isAdmin
 }
+
+Function Start-ProcessWithTimeout {
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$FilePath,
+        [Parameter(Mandatory = $true)]
+        [string]$ArgumentList,
+        [Parameter(Mandatory = $true)]
+        [int]$Timeout
+    )
+
+    $process = Start-Process -FilePath $FilePath -ArgumentList $ArgumentList -PassThru -NoNewWindow
+    $sw = [System.Diagnostics.Stopwatch]::StartNew()
+
+    while (!$process.HasExited -and $sw.Elapsed.TotalSeconds -lt $Timeout) {
+        Start-Sleep -Seconds 1
+    }
+
+    if (!$process.HasExited) {
+        Stop-Process -Id $process.Id -Force
+        Throw "Process - $FilePath timed out"
+    }else {
+        return $process
+    }
+}
