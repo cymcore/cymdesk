@@ -48,17 +48,18 @@ $CymdeskLocation = "C:\cymdesk"
 New-Item -Path 'C:\Temp' -ItemType Directory
 
 # Download git portable, extract and install it, clone cymdesk repository, change permissions
+if (!(Test-Path -Path $CymdeskLocation)) { New-Item -Path $CymdeskLocation -ItemType Directory }
 Invoke-WebRequest -Uri $GitPortableUrl -OutFile $GitSavedFile
-cmd /c "C:\Windows\Setup\Scripts\PortableGit.exe" -o"C:\Windows\Setup\Scripts\Git" -y
-cmd /c "cd C:\ && C:\Windows\Setup\Scripts\Git\bin\git.exe clone https://github.com/cymcore/cymdesk.git"
-icacls c:\cymdesk /inheritance:d
-icacls c:\cymdesk /remove "Authenticated Users"
+cmd /c $GitSavedFile -o"C:\Windows\Setup\Scripts\Git" -y
+cmd /c "cd $CymdeskLocation && C:\Windows\Setup\Scripts\Git\bin\git.exe -c http.sslBackend=openssl clone https://github.com/cymcore/cymdesk.git ."
+icacls $CymdeskLocation /inheritance:d
+icacls $CymdeskLocation /remove "Authenticated Users"
 
 [System.Environment]::SetEnvironmentVariable('CYMDESKPATH', $CymdeskLocation, [System.EnvironmentVariableTarget]::Machine)
 $env:CYMDESKPATH = [System.Environment]::GetEnvironmentVariable("CYMDESKPATH", "Machine")
 
 # Install winauto
-powershell.exe -ExecutionPolicy bypass -File C:\cymdesk\windows\apps\winauto\winauto.ps1 -action install
+powershell.exe -ExecutionPolicy bypass -File $CymdeskLocation\windows\apps\winauto\winauto.ps1 -action install
 
 # Allow admin integrity level without uac prompt
 # Note this should be re-enabled after sysadmin scripts run, but even if not winauto will re-enable it
