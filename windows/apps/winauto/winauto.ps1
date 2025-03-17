@@ -91,14 +91,19 @@ $LogSource = "winauto"
 $GithubUrl = "https://raw.githubusercontent.com/cymcore/cymdesk/refs/heads/main/windows/apps/winauto/"
 $ScheduledTaskName = "WinAuto-Run"
 $DailyRunTime = "3am"
-$WinautoStage1File = "$WinAutoDir\winauto-stage1.ps1"
-$WinautoStage2File = "$WinAutoDir\winauto-stage2.ps1"
-$WinAutoComputerFile = "$WinAutoDir\$env:COMPUTERNAME.ps1"
 $LogFile = "c:\cymlogs\winauto.ps1.error"
 
 # Derived Variables
-$WinAutoDir = $InstallLocation
-
+if ($Action -eq "Install") {
+    $WinAutoDir = $InstallLocation
+}
+else {
+    if (!((Get-Item Env:AUTOWINPATH -ErrorAction SilentlyContinue).Value)) { Throw "AUTOWINPATH environment variable not set" }
+    $WinAutoDir = $env:AUTOWINPATH
+}
+$WinautoStage1File = "$WinAutoDir\winauto-stage1.ps1"
+$WinautoStage2File = "$WinAutoDir\winauto-stage2.ps1"
+$WinAutoComputerFile = "$WinAutoDir\$env:COMPUTERNAME.ps1"
 # Source Dependent Scripts
 if ($env:CYMDESKPATH) {
     $CymdeskLocation = $env:CYMDESKPATH
