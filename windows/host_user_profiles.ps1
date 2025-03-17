@@ -62,6 +62,7 @@ $init__windev__sysadmin = @{
     240 = { Install-Wsl -DistroName "Ubuntu-24.04" }
     300 = { $WingetFilePath = "C:\Users\$($env:USERNAME)\AppData\Local\Microsoft\WindowsApps\winget.exe" ; $counter = 0 ; while (!(test-path -path $WingetFilePath) -and ($counter -lt 30)) { Start-Sleep -Seconds 10 ; write-host $counter ; $counter++ } }
     301 = { Install-WingetApp -Id git.git -CustomArgs "--scope machine" }
+    302 = { Install-WingetApp -Id Microsoft.PowerShell -CustomArgs "--source winget" }
     800 = { powershell.exe -executionpolicy bypass -file $env:AUTOWINPATH\winauto.ps1 -action trigger ; powershell.exe -executionpolicy bypass -command "Start-Sleep -Seconds 10"}
     900 = { Restart-Computer -Force }
 }
