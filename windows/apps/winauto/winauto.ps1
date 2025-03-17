@@ -145,7 +145,7 @@ Function Install-WinAuto {
     }
 
     ## Download winauto files from GitHub
-    $WinAutoFiles = @("winauto.ps1", "winauto-stage1.ps1", "winauto-stage1.ps1")
+    $WinAutoFiles = @("winauto.ps1", "winauto-stage1.ps1", "winauto-stage2.ps1")
     foreach ($WinAutoFile in $WinAutoFiles) {
         if (!(Test-Path -Path "$WinAutoDir\$WinAutoFile")) {
             $RawUrl = "$GithubUrl/$WinAutoFile"
