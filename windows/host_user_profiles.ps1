@@ -56,7 +56,6 @@ $init__windev__sysadmin = @{
     120 = { Set-DnsServerAddresses -DNSServers "192.168.7.50, 8.8.8.8" }
     140 = { Set-RdpOn }
     160 = { New-LocalSmbShare -DirPath "C:\xfer" -ShareName "xfer" }
-    180 = { Set-ExecutionPolicy -Scope CurrentUser RemoteSigned }
     190 = { Set-AutoLogonCountFix }
     220 = { Set-VirtualizationFeaturesAll }
     240 = { Install-Wsl -DistroName "Ubuntu-24.04" }
