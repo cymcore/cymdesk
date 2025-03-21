@@ -121,7 +121,8 @@ Function Start-ProcessWithTimeout {
     if (!$process.HasExited) {
         Stop-Process -Id $process.Id -Force
         Throw "Process - $FilePath timed out"
-    }else {
+    }
+    else {
         return $process
     }
 }
@@ -142,9 +143,25 @@ Function Copy-GitRepo {
         new-item -ItemType Directory -Path $DestinationPath -Force
     }
 
-    $process = Start-Process -FilePath "git" -ArgumentList "clone $GitRepoUrl $DesinationPath" -PassThru -NoNewWindow
+    # TODO check destination path is empty or not
+    Start-Process -FilePath "git" -ArgumentList "clone $GitRepoUrl $DestinationPath" -PassThru -NoNewWindow
     
-    if ($process.ExitCode -ne 0) {
-        throw "Failed to clone the repository $GitRepoUrl to $DestinationPath"
+
+}
+
+Function Add-InitialGitConfig {
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$UserName,
+        [Parameter(Mandatory = $true)]
+        [string]$UserEmail
+    )
+
+    if (!(Test-Path -Path c:\users\$UserName\.gitconfig)) {
+        git config --global user.name $UserName
+        git config --global user.email $UserEmail
+        git config --global core.autocrlf false
+        git config --global core.eol lf
+
     }
 }

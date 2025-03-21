@@ -92,7 +92,9 @@ Function Install-Wsl {
     if (! $Name) {
         $Name = "main"
     }
-    wsl.exe --install $DistroName --Name $Name
+
+    # TODO need some check code
+    wsl.exe --install $DistroName --name $Name
 }
 
 Function Add-LocalUserRdpGroup {
