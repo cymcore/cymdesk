@@ -44,6 +44,7 @@ init__windev__root() {
         "package=com.github.tchx84.Flatseal;alias=flatseal"
         "package=com.usebottles.bottles;alias=bottles"
         "package=org.kde.okular;alias=okular"
+        "package=org.kde.kate;alias=kate"
     )
     
     # Create os groups
@@ -136,11 +137,19 @@ init__windev__root() {
 
     done
 
+    # Add kate notepad alias to .cym_bashrc for users
+    for userItem in "${osUsers[@]}"; do 
+        declare -A userDetail
+        GetDictionaryItemFromArrayItem "$userItem" userDetail
+        AddKateNotepadToCymBashrc --userName=${userDetail[name]}
+
+    done
 }
 
 windev__ptimme01() {
 
     InstallMiniConda
+
 }
 
 ### Set HostUserProfile (depends on if called with -Init) and runs function

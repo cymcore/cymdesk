@@ -128,3 +128,31 @@ EOF
 
 }
 
+AddKateNotepadToCymBashrc() {
+    local userName=""
+  
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --userName=*) userName="${1#*=}" ;;
+            *) echo "Unknown option: $1"; return 1 ;;
+        esac
+        shift
+    done
+
+    if [[ $userName == "root" ]]; then
+        cymBashrcFile="/root/.cym_bashrc"
+    else
+        cymBashrcFile="/home/$userName/.cym_bashrc"
+    fi
+
+    if ! flatpak list | grep org.kde.kate; then
+    cat << 'EOF' >> $cymBashrcFile
+notepad() {
+    flatpak run org.kde.kate "$@" &
+}
+
+EOF
+    fi
+
+}
+
