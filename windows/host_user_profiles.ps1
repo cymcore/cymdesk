@@ -76,8 +76,13 @@ $windev__sysadmin = @{
 }
 
 $windev__ptimme01 = @{
-    240 = { Install-Wsl -DistroName "Ubuntu-24.04" }
     300 = { Install-WingetApp -Id microsoft.visualstudiocode -CustomArgs "--override ""/VERYSILENT /SP- /MERGETASKS='!runcode,!desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath\'""" }
+    340 = { Install-Wsl -DistroName "Ubuntu-24.04" --Name main}
+    345 = { Copy-GitRepo -RepoUrl "https://github.com/cymcore/cymdesk.git" -DestinationPath "C:\xfer\cymdesk"}
+    350 = { Start-Process -filepath cmd.exe -ArgumentList "/c wsl.exe -d main" -Wait -NoNewWindow }
+    355 = { Start-Process -filepath cmd.exe -ArgumentList "/c wsl.exe -d main --user root chmod -R +x /mnt/c/xfer/cymdesk/*.sh" -Wait -NoNewWindow }
+    360 = { Start-Process -filepath cmd.exe -ArgumentList "/c wsl.exe -d main --user root /mnt/c/xfer/cymdesk/wsl/host_user_profiles.sh -Init" -Wait -NoNewWindow }
+
 }
 
 

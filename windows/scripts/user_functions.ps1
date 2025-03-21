@@ -65,11 +65,6 @@ Function Install-WingetApp {
     }
     
 }
-# Note: if winget arguments have both single and double quotes, use a here string
-# $CustomArgs = @"
-#  --override '/VERYSILENT /SP- /MERGETASKS="!runcode,!desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath"'
-# "@
-
 Function Get-AreTwoFilesSame {
     param (
         [Parameter(Mandatory = $true)]
@@ -128,5 +123,28 @@ Function Start-ProcessWithTimeout {
         Throw "Process - $FilePath timed out"
     }else {
         return $process
+    }
+}
+
+Function Copy-GitRepo {
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$GitRepoUrl,
+        [Parameter(Mandatory = $true)]
+        [string]$DestinationPath
+    )
+
+    if (!(get-command git -ErrorAction SilentlyContinue)) {
+        throw "Git is not installed or not found in the PATH"
+    }
+
+    if (!(Test-Path -Path $DestinationPath)) {
+        new-item -ItemType Directory -Path $DestinationPath -Force
+    }
+
+    $process = Start-Process -FilePath "git" -ArgumentList "clone $GitRepoUrl $DesinationPath" -PassThru -NoNewWindow
+    
+    if ($process.ExitCode -ne 0) {
+        throw "Failed to clone the repository $GitRepoUrl to $DestinationPath"
     }
 }

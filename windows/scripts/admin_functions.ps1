@@ -85,9 +85,14 @@ Function Set-RdpOn {
 Function Install-Wsl {
     param (
         [Parameter(Mandatory = $true)]
-        [string]$DistroName
+        [string]$DistroName, 
+        [string]$Name
     )
-    wsl.exe --install -d $DistroName
+
+    if (! $Name) {
+        $Name = "main"
+    }
+    wsl.exe --install $DistroName --Name $Name
 }
 
 Function Add-LocalUserRdpGroup {
