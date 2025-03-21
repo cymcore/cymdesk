@@ -149,7 +149,8 @@ init__windev__root() {
 windev__ptimme01() {
 
     InstallMiniConda
-
+    distrobox create -n apps -i quay.io/fedora/fedora:41 --yes --volume /mnt/c/xfer:/xfer:rw --additional-packages "git tmux vim"
+    distrobox enter -n apps -- bash -c "sudo /xfer/cymdesk/distrobox/create_apps.sh --dbox=apps --username=ptimme01"
 }
 
 ### Set HostUserProfile (depends on if called with -Init) and runs function
