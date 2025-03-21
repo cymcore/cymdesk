@@ -83,6 +83,7 @@ $windev__ptimme01 = @{
     350 = { Start-Process -filepath cmd.exe -ArgumentList "/c wsl.exe -d main" -Wait -NoNewWindow }
     355 = { Start-Process -filepath cmd.exe -ArgumentList "/c wsl.exe -d main --user root find /mnt/c/xfer/cymdesk -type f -name `"*.sh`" -exec chmod +x {} \;" -Wait -NoNewWindow }
     360 = { Start-Process -filepath cmd.exe -ArgumentList "/c wsl.exe -d main --user root /mnt/c/xfer/cymdesk/wsl/host_user_profiles.sh -Init" -Wait -NoNewWindow }
+    370 = { Start-Process -filepath cmd.exe -ArgumentList "/c wsl.exe -d main --user ptimme01 /mnt/c/xfer/cymdesk/wsl/host_user_profiles.sh" -Wait -NoNewWindow }
 
 }
 
