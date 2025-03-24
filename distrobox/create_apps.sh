@@ -43,11 +43,12 @@ dnf install -y google-chrome-stable
 
 # add aliases
 cat << EOF >> /home/$username/.cym_bashrc
-if podman inspect $dbox; then
-    alias chrome="nohup distrobox enter -n apps -- google-chrome-stable > /dev/null 2>&1 &"
-    alias edge="nohup distrobox enter -n apps -- microsoft-edge > /dev/null 2>&1 &"
-    alias edge="nohup distrobox enter -n apps -- vlc > /dev/null 2>&1 &"
+if podman inspect "$dbox" &> /dev/null; then
+    alias chrome="nohup distrobox enter -n "$dbox" -- google-chrome-stable &> /dev/null &"
+    alias edge="nohup distrobox enter -n "$dbox" -- microsoft-edge &> /dev/null &"
+    alias vlc="nohup distrobox enter -n "$dbox" -- vlc &> /dev/null &"
  
 fi
 
 EOF
+
