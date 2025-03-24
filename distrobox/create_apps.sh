@@ -3,7 +3,7 @@ username=""
 while [ $# -gt 0 ]; do
     case "$1" in
         --dbox=*) dbox="${1#*=}" ;;
-        --username=*) userName="${1#*=}" ;;
+        --username=*) username="${1#*=}" ;;
         *) echo "Unknown option: $1"; return 1 ;;
     esac
     shift
@@ -20,7 +20,7 @@ if podman inspect $dbox; then
 fi
 
 # install dnf apps
-dnf install -y nano wget vlc gimp
+dnf install -y vlc
 
 # install microsoft edge
 rpm --import https://packages.microsoft.com/keys/microsoft.asc
@@ -42,9 +42,12 @@ dnf config-manager setopt google-chrome.enabled=1
 dnf install -y google-chrome-stable
 
 # add aliases
-cat << 'EOF' >> /home/$username/.cym_bashrc
-if [ -n "$CONTAINER_ID" ]; then
-    alias chrome="google-chrome-stable"
-    alias edge="microsoft-edge"
-
+cat << EOF >> /home/$username/.cym_bashrc
+if podman inspect $dbox; then
+    alias chrome="nohup distrobox enter -n apps -- google-chrome-stable > /dev/null 2>&1 &"
+    alias edge="nohup distrobox enter -n apps -- microsoft-edge > /dev/null 2>&1 &"
+    alias edge="nohup distrobox enter -n apps -- vlc > /dev/null 2>&1 &"
+ 
 fi
+
+EOF
