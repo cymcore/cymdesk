@@ -150,7 +150,7 @@ init__windev__root() {
     )
     
     # A 1 means install docker, 0 means don't install
-    installDocker = 1
+    installDocker=1
     
     wsl_base
     
