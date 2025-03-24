@@ -94,7 +94,7 @@ InstallMiniConda() {
         wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda-installer.sh
         bash /tmp/miniconda-installer.sh -b
         /home/$USER/miniconda3/bin/conda init
-        source /home/$USER/.bashrc && conda config --set auto_activate_base false
+        /home/$USER/miniconda3/bin/conda config --set auto_activate_base false
     fi
 
 }
