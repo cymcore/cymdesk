@@ -19,34 +19,8 @@ source $relativeRoot/scripts/base.sh
 source $relativeRoot/scripts/admin_functions.sh
 source $relativeRoot/scripts/user_functions.sh
 
+wsl_base() {
 
-
-init__windev__root() {
-
-    osGroups=(
-        "name=duo_sudo;id=3000"
-        "name=duo_users;id=3001"
-        "name=docker;id=3002"
-    )
-    
-    osUsers=(
-        "name=root;id=0;desc=Root;groups=root;email=root@cymcore.com"
-        "name=ptimme01;id=1000;desc=Paul Timmerman;groups=docker,users;email=ptimme01@outlook.com"
-    )
-
-    aptPackages=(
-        "package=podman"
-        "package=flatpak"
-        "package=thunar"
-    )
-
-    flatpakPackages=(
-        "package=com.github.tchx84.Flatseal;alias=flatseal"
-        "package=com.usebottles.bottles;alias=bottles"
-        "package=org.kde.okular;alias=okular"
-        "package=org.kde.kate;alias=kate"
-    )
-    
     # Create os groups
     for groupItem in "${osGroups[@]}"; do 
         declare -A groupDetail
@@ -108,8 +82,11 @@ init__windev__root() {
     ConfigureFlatpak
     ConfigurePodman
     InstallDistrobox
-    InstallDocker
 
+    if [ "$installDocker" -eq 1 ]; then
+        InstallDocker
+    fi
+  
     # Install flatpak packages
     for flatpakItem in "${flatpakPackages[@]}"; do 
         declare -A flatpakDetail
@@ -146,11 +123,44 @@ init__windev__root() {
     done
 }
 
+init__windev__root() {
+
+    osGroups=(
+        "name=duo_sudo;id=3000"
+        "name=duo_users;id=3001"
+        "name=docker;id=3002"
+    )
+    
+    osUsers=(
+        "name=root;id=0;desc=Root;groups=root;email=root@cymcore.com"
+        "name=ptimme01;id=1000;desc=Paul Timmerman;groups=docker,users;email=ptimme01@outlook.com"
+    )
+
+    aptPackages=(
+        "package=podman"
+        "package=flatpak"
+        "package=thunar"
+    )
+
+    flatpakPackages=(
+        "package=com.github.tchx84.Flatseal;alias=flatseal"
+        "package=com.usebottles.bottles;alias=bottles"
+        "package=org.kde.okular;alias=okular"
+        "package=org.kde.kate;alias=kate"
+    )
+    
+    # A 1 means install docker, 0 means don't install
+    installDocker = 1
+    
+    wsl_base
+    
+}
+
 windev__ptimme01() {
 
-    InstallMiniConda
-    distrobox create -n apps -i quay.io/fedora/fedora:41 --yes --volume /mnt/c/xfer:/xfer:rw --additional-packages "git tmux vim"
+    distrobox create -n apps -i quay.io/fedora/fedora:41 --yes --volume /mnt/c/xfer:/xfer:rw --additional-packages "git tmux vim nano wget"
     distrobox enter -n apps -- bash -c "sudo /xfer/cymdesk/distrobox/create_apps.sh --dbox=apps --username=ptimme01"
+    InstallMiniConda
 }
 
 ### Set HostUserProfile (depends on if called with -Init) and runs function
