@@ -11,14 +11,14 @@ set -xe
 
 ### Derived variables
 relativeRoot="$(dirname "$0")"
-
+distroboxPath=$(realpath "$relativeRoot/../distrobox")
 ### Custom
 
 ### Source scripts
 source $relativeRoot/scripts/base.sh
 source $relativeRoot/scripts/admin_functions.sh
 source $relativeRoot/scripts/user_functions.sh
-
+source $distroboxPath/create_dbox_app.sh
 wsl_base() {
 
     # Create os groups
@@ -158,8 +158,19 @@ init__windev__root() {
 
 windev__ptimme01() {
 
-    distrobox create -n apps -i quay.io/fedora/fedora:41 --yes --volume /mnt/c/xfer:/xfer:rw --additional-packages "git tmux vim nano wget"
-    distrobox enter -n apps -- bash -c "sudo /xfer/cymdesk/distrobox/create_apps.sh --dbox=apps --username=ptimme01"
+    dboxApps=(
+        "app=chome;image=quay.io/fedora/fedora:41;username=ptimme01"
+        "app=edge;image=quay.io/fedora/fedora:41;username=ptimme01"
+    )
+
+    for dboxItem in "${dboxApps[@]}"; do 
+        declare -A dboxDetail
+        GetDictionaryItemFromArrayItem "$dboxItem" dboxDetail
+        CreateDboxApp --app=${dboxDetail[app]} --image=${dboxDetail[image]}
+        ConfigureDboxApp --app=${dboxDetail[app]} --username=${dboxDetail[username]} 
+        
+    done
+
     InstallMiniConda
 }
 
