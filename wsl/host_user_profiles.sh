@@ -70,6 +70,7 @@ wsl_base() {
 
     done
 
+    InstallMicrosoftPackageRepo
     apt update
 
     # Install apt packages
@@ -141,6 +142,7 @@ init__windev__root() {
         "package=podman"
         "package=flatpak"
         "package=thunar"
+        "package=powershell"
     )
 
     flatpakPackages=(
