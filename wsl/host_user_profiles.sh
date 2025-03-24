@@ -19,6 +19,7 @@ source $relativeRoot/scripts/base.sh
 source $relativeRoot/scripts/admin_functions.sh
 source $relativeRoot/scripts/user_functions.sh
 source $distroboxPath/create_dbox_app.sh
+source $distroboxPath/configure_dbox_app.sh
 wsl_base() {
 
     # Create os groups
@@ -159,7 +160,7 @@ init__windev__root() {
 windev__ptimme01() {
 
     dboxApps=(
-        "app=chome;image=quay.io/fedora/fedora:41;username=ptimme01"
+        "app=chrome;image=quay.io/fedora/fedora:41;username=ptimme01"
         "app=edge;image=quay.io/fedora/fedora:41;username=ptimme01"
     )
 
