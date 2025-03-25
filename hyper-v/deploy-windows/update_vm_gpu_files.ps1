@@ -8,7 +8,7 @@ Param (
 
 ### Source Files
 . $PSSCriptRoot\add_vm_gpu_files.ps1
-. $PSSCriptRoo\create_gpu_partition.ps1 ; $GpuName = Get-GpuVmPartitionAdapterName
+. $PSSCriptRoot\create_gpu_partition.ps1 ; $GpuName = Get-GpuVmPartitionAdapterName
 
 $VM = Get-VM -VMName $VMName
 $VHDXPath = ($VmPath + $VmName + "\Virtual Hard Disks\" + $VmName + ".vhdx")

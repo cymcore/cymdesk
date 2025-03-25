@@ -86,7 +86,7 @@ New-HyperVVm @vm_config
 New-OsImageDeploy -VmName $vm_config.VmName -VmPath $vm_config.VmPath -WindowsIso $windows_iso -OsConfig $os_config -FullVmConfigDir $FullVmConfigDir
 
 if ($vm_config.AssignGpuParition) {
-    . $PSScriptRoot\update_vm_gpu_files.ps1 -VmName $vm_config.VmName -GPUName $GpuName -VmPath $vm_config.VmPath 
+    . $PSScriptRoot\update_vm_gpu_files.ps1 -VmName $vm_config.VmName -VmPath $vm_config.VmPath 
 }
 
 Start-VM -Name $vm_config.VmName
