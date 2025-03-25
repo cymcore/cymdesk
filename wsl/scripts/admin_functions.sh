@@ -9,13 +9,13 @@ apt-get install -y wget apt-transport-https software-properties-common
 source /etc/os-release
 
 # Download the Microsoft repository keys
-wget -q https://packages.microsoft.com/config/ubuntu/$VERSION_ID/packages-microsoft-prod.deb
+wget -P /tmp https://packages.microsoft.com/config/ubuntu/$VERSION_ID/packages-microsoft-prod.deb
 
 # Register the Microsoft repository keys
-dpkg -i packages-microsoft-prod.deb
+dpkg -i /tmp/packages-microsoft-prod.deb
 
 # Delete the Microsoft repository keys file
-packages-microsoft-prod.deb
+rm /tmp/packages-microsoft-prod.deb
 
 # Update the list of packages after we added packages.microsoft.com
 apt-get update
