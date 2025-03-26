@@ -165,3 +165,25 @@ Function Add-InitialGitConfig {
 
     }
 }
+
+Function Set-WslInstanceConfiguration {
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$Name,
+        [string]$InternalCymdeskPath = "/mnt/c/xfer/cymdesk",
+        [string]$UserName
+    )
+        
+    if (!(test-path -path $)) { Throw "Cymdesk path does not exist" }
+
+    # Interactive to set user and password 
+    Start-Process -filepath cmd.exe -ArgumentList "/c wsl.exe -d $Name" -Wait -NoNewWindow 
+
+    Start-Process -filepath cmd.exe -ArgumentList "/c wsl.exe -d $Name --user root find $InstanceCymdeskPath -type f -name `"*.sh`" -exec chmod +x {} \;" -Wait -NoNewWindow
+    Start-Process -filepath cmd.exe -ArgumentList "/c wsl.exe -d $Name --user root $InstanceCymdeskPath/wsl/host_user_profiles.sh --wslName=$Name --initWsl=true" -Wait -NoNewWindow
+        
+    # this is because distrobox won't exit when started with start-process
+    wsl.exe -d $Name --user $UserName $InstanceCymdeskPath/host_user_profiles.sh --wslName=$Name
+    
+
+}

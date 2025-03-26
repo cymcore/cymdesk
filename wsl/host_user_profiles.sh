@@ -125,7 +125,7 @@ wsl_base() {
     done
 }
 
-init__windev__root() {
+init__windev__main__root() {
 
     osGroups=(
         "name=duo_sudo;id=3000"
@@ -143,6 +143,8 @@ init__windev__root() {
         "package=flatpak"
         "package=thunar"
         "package=powershell"
+        "package=pciutils"
+        "package=build-essential"
     )
 
     flatpakPackages=(
@@ -159,7 +161,61 @@ init__windev__root() {
     
 }
 
-windev__ptimme01() {
+windev__main__ptimme01() {
+
+    dboxApps=(
+        "app=chrome;image=quay.io/fedora/fedora:41;username=ptimme01"
+        "app=edge;image=quay.io/fedora/fedora:41;username=ptimme01"
+    )
+
+    for dboxItem in "${dboxApps[@]}"; do 
+        declare -A dboxDetail
+        GetDictionaryItemFromArrayItem "$dboxItem" dboxDetail
+        CreateDboxApp --app=${dboxDetail[app]} --image=${dboxDetail[image]}
+        ConfigureDboxApp --app=${dboxDetail[app]} --username=${dboxDetail[username]} 
+        
+    done
+
+    InstallMiniConda
+}
+
+init__north__main__root() {
+
+    osGroups=(
+        "name=duo_sudo;id=3000"
+        "name=duo_users;id=3001"
+        "name=docker;id=3002"
+    )
+    
+    osUsers=(
+        "name=root;id=0;desc=Root;groups=root;email=root@cymcore.com"
+        "name=ptimme01;id=1000;desc=Paul Timmerman;groups=docker,users;email=ptimme01@outlook.com"
+    )
+
+    aptPackages=(
+        "package=podman"
+        "package=flatpak"
+        "package=thunar"
+        "package=powershell"
+        "package=pciutils"
+        "package=build-essential"
+    )
+
+    flatpakPackages=(
+        "package=com.github.tchx84.Flatseal;alias=flatseal"
+        "package=com.usebottles.bottles;alias=bottles"
+        "package=org.kde.okular;alias=okular"
+        "package=org.kde.kate;alias=kate"
+    )
+    
+    # A 1 means install docker, 0 means don't install
+    installDocker=1
+    
+    wsl_base
+    
+}
+
+north__main__ptimme01() {
 
     dboxApps=(
         "app=chrome;image=quay.io/fedora/fedora:41;username=ptimme01"
@@ -178,13 +234,25 @@ windev__ptimme01() {
 }
 
 ### Set HostUserProfile (depends on if called with -Init) and runs function
-if [ "$1" == "-Init" ]; then
-    hostUserProfile="init__${HOSTNAME}__${USER}"
+
+wslName=""
+initWsl=""
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --wslName=*) wslName="${1#*=}" ;;
+        --initWsl=*) initWsl="${1#*=}" ;;
+        *) echo "Unknown option: $1"; return 1 ;;
+    esac
+    shift
+done
+
+if [ "$initWsl" == "true" ]; then
+    hostUserProfile="init__${HOSTNAME}__${wslName}__${USER}"
     if declare -F "$hostUserProfile" &>/dev/null; then
         $hostUserProfile
     fi
 else
-    hostUserProfile="${HOSTNAME}__${USER}"
+    hostUserProfile="${HOSTNAME}__${wslName}__${USER}"
     if declare -F "$hostUserProfile" &>/dev/null; then
         $hostUserProfile
     fi
