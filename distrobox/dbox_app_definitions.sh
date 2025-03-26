@@ -1,3 +1,4 @@
+#!/bin/bash
 # This script get called inside of a dbox
 username=""
 app=""

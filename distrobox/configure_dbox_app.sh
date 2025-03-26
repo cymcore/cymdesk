@@ -11,7 +11,7 @@ while [ $# -gt 0 ]; do
 done
 
 dbox="app-${app}"
-
+appDefinitionScript="https://raw.githubusercontent.com/cymcore/cymdesk/refs/heads/main/distrobox/dbox_app_definitions.sh"
 
 if [ "$EUID" -eq 0 ]; then
     echo "Please do not run as root"
@@ -30,7 +30,7 @@ if ! podman inspect $dbox; then
     echo "Container $dbox does not exist. Exiting."
     exit 1
 fi
-
-distrobox enter -n "$dbox" -- bash -c "sudo /xfer/cymdesk/distrobox/dbox_app_definitions.sh --app=$app --username=$username"
+distrobox enter -n "$dbox" -- bash -c "wget -P /tmp $appDefinitionScript; chmod +x /tmp/dbox_app_definitions.sh"
+distrobox enter -n "$dbox" -- bash -c "sudo /tmp/dbox_app_definitions.sh --app=$app --username=$username"
 
 }

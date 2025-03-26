@@ -13,6 +13,11 @@ done
 dbox="app-${app}"
 externalXferPath="/mnt/c/xfer"
 
+if [ ! -d $externalXferPath ]; then
+    echo "External xfer path not present"
+    exit 1
+fi
+
 if [ "$EUID" -eq 0 ]; then
     echo "Please do not run as root"
     exit 1
