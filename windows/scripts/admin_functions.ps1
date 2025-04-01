@@ -142,7 +142,7 @@ Function New-EventLogSource {
         [Parameter(Mandatory = $true)]
         [string]$source
     )
-    if (!(Test-Admin)) {
+    if (!(Test-IsAdmin)) {
         Throw "This function must be run as an administrator."
     }
     
@@ -222,7 +222,7 @@ Function Set-EnviromentVariableMachine {
     [System.Environment]::SetEnvironmentVariable($Name, $Value, [System.EnvironmentVariableTarget]::Machine)
 }
 
-Function Test-Admin {
+Function Test-IsAdmin {
 
     $currentUser = New-Object Security.Principal.WindowsPrincipal $([Security.Principal.WindowsIdentity]::GetCurrent())
     $isAdmin = $currentUser.IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)

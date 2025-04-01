@@ -309,7 +309,7 @@ Function Main {
 }
 
 
-if (-not (Test-Admin) -and ($Action -ne "Trigger")) {
+if (-not (Test-IsAdmin) -and ($Action -ne "Trigger")) {
     New-EventLogEntry -LogName $LogName -LogSource $LogSource -LogEventID 305 -LogEntryType (Get-LogIdMetadata(305)).LogEntryType -LogMessage (Get-LogIdMetadata(305)).LogMessage
 
     Throw "This script must be run as an administrator."
