@@ -71,14 +71,6 @@ ConfigureFlatpak() {
         flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
     fi
 
-    if ! cat /etc/containers/registries.conf | grep registries.search; then
-        echo '[registries.search]' >> /etc/containers/registries.conf
-    fi
-
-    if ! cat /etc/containers/registries.conf | grep registries=.*redhat.*fedoraproject.*docker; then
-        echo 'registries=["registry.access.redhat.com", "registry.fedoraproject.org", "docker.io"]' >> /etc/containers/registries.conf
-    fi
-
     # after installing flatpak, gui apps start slow.  this fixes (but lose print, open files, open url)
     apt remove -y xdg-desktop-portal
 
@@ -86,6 +78,14 @@ ConfigureFlatpak() {
 
 ConfigurePodman() {
 
+    if ! cat /etc/containers/registries.conf | grep ^.registries.search; then
+        echo '[registries.search]' >> /etc/containers/registries.conf
+    fi
+
+    if ! cat /etc/containers/registries.conf | grep ^unqualified-search-registries.=; then
+        echo 'unqualified-search-registries = ["docker.io", "registry.access.redhat.com", "registry.fedoraproject.org", "quay.io"]' >> /etc/containers/registries.conf
+    fi
+   
     if ! cat /etc/sysctl.conf | grep unprivileged_port_start=0; then
         echo 'net.ipv4.ip_unprivileged_port_start=0' >> /etc/sysctl.conf
         sysctl -p
@@ -207,6 +207,42 @@ AddLocalUserToLocalGroup() {
     for groupName in ${userGroupsArray[@]}; do
         usermod -a -G $groupName $userName
     done
+
+}
+
+InstallNvidiaContainerToolkit() {
+
+    local backend=""
+
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --backend=*) backend="${1#*=}" ;;
+            *) echo "Unknown option: $1"; return 1 ;;
+        esac
+        shift
+    done
+
+    cd /tmp
+    curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
+    && curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
+    sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
+    sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+
+    sudo apt-get update
+
+    sudo apt-get install -y nvidia-container-toolkit
+
+    if [ "$backend" == "docker" ]; then
+
+        sudo nvidia-ctk runtime configure --runtime=docker
+        sudo systemctl restart docker
+    fi
+
+    if [ "$backend" == "podman" ]; then
+
+        sudo nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml
+
+    fi
 
 }
 

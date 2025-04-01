@@ -123,6 +123,12 @@ wsl_base() {
         AddKateNotepadToCymBashrc --userName=${userDetail[name]}
 
     done
+
+    if [ ! -z "$installNvContainerToolkit" ]; then
+        InstallNvidiaContainerToolkit --backend=$installNvContainerToolkit
+    fi
+
+    
 }
 
 init__windev__main__root() {
@@ -210,6 +216,9 @@ init__north__main__root() {
     
     # A 1 means install docker, 0 means don't install
     installDocker=1
+    
+    # podman or docker, or set "" to not install the cuda toolkit
+    installNvContainerToolkit="podman"
     
     wsl_base
     
