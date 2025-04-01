@@ -76,6 +76,7 @@ $winai__sysadmin = @{
 $winai__ptimme01 = @{
     220 = { Add-InitialGitConfig -UserName "ptimme01" -UserEmail "ptimme01@outlook.com" }
     300 = { Install-WingetApp -Id microsoft.visualstudiocode -CustomArgs "--override ""/VERYSILENT /SP- /MERGETASKS='!runcode,!desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath\'""" }
+    
 }
 
 $init__windev__sysadmin = @{
@@ -107,15 +108,15 @@ $windev__ptimme01 = @{
     300 = { Install-WingetApp -Id microsoft.visualstudiocode -CustomArgs "--override ""/VERYSILENT /SP- /MERGETASKS='!runcode,!desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath\'""" }
     340 = { Install-Wsl -DistroName "Ubuntu-24.04" -Name main}
     345 = { Copy-GitRepo -GitRepoUrl "https://github.com/cymcore/cymdesk.git" -DestinationPath "C:\xfer\cymdesk"}
-    350 = { Set-WslInstanceConfiguration -Name main -UserName ptimme01 -InstanceCymdeskPath "/mnt/c/Users/ptimme01/cymdesk"}
+    350 = { Set-WslInstanceConfiguration -Name main -UserName ptimme01 -InstanceCymdeskPath "/mnt/c/xfer/cymdesk"}
 }
 
 $north__ptimme01 = @{
     220 = { Add-InitialGitConfig -UserName "ptimme01" -UserEmail "ptimme01@outlook.com" }
     300 = { Install-WingetApp -Id microsoft.visualstudiocode -CustomArgs "--override ""/VERYSILENT /SP- /MERGETASKS='!runcode,!desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath\'""" }
     340 = { Install-Wsl -DistroName "Ubuntu-24.04" -Name main}
-    345 = { Copy-GitRepo -GitRepoUrl "https://github.com/cymcore/cymdesk.git" -DestinationPath "C:\Users\ptimme01\cymdesk"}
-    350 = { Set-WslInstanceConfiguration -Name main -UserName ptimme01 -InstanceCymdeskPath "/mnt/c/Users/ptimme01/cymdesk"}
+    345 = { Copy-GitRepo -GitRepoUrl "https://github.com/cymcore/cymdesk.git" -DestinationPath "C:\xfer\cymdesk"}
+    350 = { Set-WslInstanceConfiguration -Name main -UserName ptimme01 -InstanceCymdeskPath "/mnt/c/xfer/cymdesk"}
 }
 
 ### Set HostUserProfile (depends on if called with -Init)
