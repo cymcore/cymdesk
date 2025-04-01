@@ -51,6 +51,33 @@ $LogFile = "c:\cymlogs\host_user_profiles.ps1.error"
 
 ### Profiles
 
+$init__winai__sysadmin = @{
+    100 = { Set-StaticIpAddress -IpAddress "192.168.8.71" -IpSubnetMask "24" -IpGateway "192.168.8.1" }
+    120 = { Set-DnsServerAddresses -DNSServers "192.168.7.50, 8.8.8.8" }
+    140 = { Set-RdpOn }
+    160 = { New-LocalSmbShare -DirPath "C:\xfer" -ShareName "xfer" }
+    190 = { Set-AutoLogonCountFix }
+    300 = { $WingetFilePath = "C:\Users\$($env:USERNAME)\AppData\Local\Microsoft\WindowsApps\winget.exe" ; $counter = 0 ; while (!(test-path -path $WingetFilePath) -and ($counter -lt 30)) { Start-Sleep -Seconds 10 ; write-host $counter ; $counter++ } }
+    301 = { Install-WingetApp -Id git.git -CustomArgs "--scope machine" }
+    302 = { Install-WingetApp -Id Microsoft.PowerShell -CustomArgs "--source winget" }
+    800 = { powershell.exe -executionpolicy bypass -file $env:AUTOWINPATH\winauto.ps1 -action trigger ; powershell.exe -executionpolicy bypass -command "Start-Sleep -Seconds 10"}
+    900 = { Restart-Computer -Force }
+}
+
+$winai__sysadmin = @{
+    100 = { if (!(Test-IsAdmin)) { Throw "Must run with elevated privs" } }
+    110 = { Set-LocalUserEnableAndPassword -UserName "sysadmin" }
+    200 = { New-LocalUserWithRandomPassword -UserName "ptimme01" -UserDescription "Paul Timmerman" }
+    201 = { Set-LocalUserEnableAndPassword -UserName "ptimme01" }
+    210 = { Add-LocalUserRdpGroup -UserName "ptimme01" }
+    300 = { Install-WingetApp -Id microsoft.visualstudiocode -CustomArgs "--override ""/VERYSILENT /SP- /MERGETASKS='!runcode,!desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath\'""" }
+}
+
+$winai__ptimme01 = @{
+    220 = { Add-InitialGitConfig -UserName "ptimme01" -UserEmail "ptimme01@outlook.com" }
+    300 = { Install-WingetApp -Id microsoft.visualstudiocode -CustomArgs "--override ""/VERYSILENT /SP- /MERGETASKS='!runcode,!desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath\'""" }
+}
+
 $init__windev__sysadmin = @{
     100 = { Set-StaticIpAddress -IpAddress "192.168.8.70" -IpSubnetMask "24" -IpGateway "192.168.8.1" }
     120 = { Set-DnsServerAddresses -DNSServers "192.168.7.50, 8.8.8.8" }
@@ -67,7 +94,7 @@ $init__windev__sysadmin = @{
 }
 
 $windev__sysadmin = @{
-    100 = { if (!(Test-Admin)) { Throw "Must run with elevated privs" } }
+    100 = { if (!(Test-IsAdmin)) { Throw "Must run with elevated privs" } }
     110 = { Set-LocalUserEnableAndPassword -UserName "sysadmin" }
     200 = { New-LocalUserWithRandomPassword -UserName "ptimme01" -UserDescription "Paul Timmerman" }
     201 = { Set-LocalUserEnableAndPassword -UserName "ptimme01" }
@@ -80,7 +107,7 @@ $windev__ptimme01 = @{
     300 = { Install-WingetApp -Id microsoft.visualstudiocode -CustomArgs "--override ""/VERYSILENT /SP- /MERGETASKS='!runcode,!desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath\'""" }
     340 = { Install-Wsl -DistroName "Ubuntu-24.04" -Name main}
     345 = { Copy-GitRepo -GitRepoUrl "https://github.com/cymcore/cymdesk.git" -DestinationPath "C:\xfer\cymdesk"}
-    350 = { Set-WslInstanceConfiguration -Name main -UserName ptimme01}
+    350 = { Set-WslInstanceConfiguration -Name main -UserName ptimme01 -InstanceCymdeskPath "/mnt/c/Users/ptimme01/cymdesk"}
 }
 
 $north__ptimme01 = @{
@@ -88,7 +115,7 @@ $north__ptimme01 = @{
     300 = { Install-WingetApp -Id microsoft.visualstudiocode -CustomArgs "--override ""/VERYSILENT /SP- /MERGETASKS='!runcode,!desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath\'""" }
     340 = { Install-Wsl -DistroName "Ubuntu-24.04" -Name main}
     345 = { Copy-GitRepo -GitRepoUrl "https://github.com/cymcore/cymdesk.git" -DestinationPath "C:\Users\ptimme01\cymdesk"}
-    350 = { Set-WslInstanceConfiguration -Name main -UserName ptimme01 -InstanceCymdeskPath "C:\Users\ptimme01\cymdesk"}
+    350 = { Set-WslInstanceConfiguration -Name main -UserName ptimme01 -InstanceCymdeskPath "/mnt/c/Users/ptimme01/cymdesk"}
 }
 
 ### Set HostUserProfile (depends on if called with -Init)
