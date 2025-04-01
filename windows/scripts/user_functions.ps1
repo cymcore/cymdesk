@@ -93,7 +93,7 @@ Function Get-WebFile {
 
 }
 
-Function Test-Admin {
+Function Test-IsAdmin {
 
     $currentUser = New-Object Security.Principal.WindowsPrincipal $([Security.Principal.WindowsIdentity]::GetCurrent())
     $isAdmin = $currentUser.IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)
@@ -170,20 +170,19 @@ Function Set-WslInstanceConfiguration {
     param (
         [Parameter(Mandatory = $true)]
         [string]$Name,
-        [string]$InternalCymdeskPath = "/mnt/c/xfer/cymdesk",
+        [string]$InstanceCymdeskPath = "/mnt/c/xfer/cymdesk",
         [string]$UserName
     )
-        
-    if (!(test-path -path $)) { Throw "Cymdesk path does not exist" }
-
+    
     # Interactive to set user and password 
-    Start-Process -filepath cmd.exe -ArgumentList "/c wsl.exe -d $Name" -Wait -NoNewWindow 
+    wsl.exe -d $Name
 
-    Start-Process -filepath cmd.exe -ArgumentList "/c wsl.exe -d $Name --user root find $InstanceCymdeskPath -type f -name `"*.sh`" -exec chmod +x {} \;" -Wait -NoNewWindow
-    Start-Process -filepath cmd.exe -ArgumentList "/c wsl.exe -d $Name --user root $InstanceCymdeskPath/wsl/host_user_profiles.sh --wslName=$Name --initWsl=true" -Wait -NoNewWindow
-        
-    # this is because distrobox won't exit when started with start-process
-    wsl.exe -d $Name --user $UserName $InstanceCymdeskPath/host_user_profiles.sh --wslName=$Name
+    wsl.exe -d $Name --user root ls $InstanceCymdeskPath
+    if ($LASTEXITCODE -ne 0) {Throw "cymdesk inside the wsl instance not found"}
+
+    wsl.exe -d $Name --user root find $InstanceCymdeskPath -type f -name `"*.sh`"
+    wsl.exe -d $Name --user root $InstanceCymdeskPath/wsl/host_user_profiles.sh --wslName=$Name --initWsl=true
+    wsl.exe -d $Name --user $UserName $InstanceCymdeskPath/wsl/host_user_profiles.sh --wslName=$Name
     
 
 }
