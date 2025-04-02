@@ -208,12 +208,11 @@ Function Set-WindowsFileExplorerHideFileExtensions {
     $HideValue = if ($HideFileExtensions) { 1 } else { 0 }
 
     Set-ItemProperty -Path $RegPath -Name HideFileExt -Value $HideValue
-    RUNDLL32.EXE USER32.DLL, UpdatePerUserSystemParameters
 
     if ($HideFileExtensions) {
-        Write-Host "File extensions are now hidden in File Explorer."
+        Write-Host "File extensions are now hidden in File Explorer. Log out required."
     } else {
-        Write-Host "File extensions are now visible in File Explorer."
+        Write-Host "File extensions are now visible in File Explorer. Log out required."
     }
 }
 
@@ -230,12 +229,11 @@ Function Set-WindowsFileExplorerShowHiddenItems {
     $HiddenValue = if ($ShowHiddenItems) { 1 } else { 2 }
 
     Set-ItemProperty -Path $RegPath -Name Hidden -Value $HiddenValue
-    RUNDLL32.EXE USER32.DLL, UpdatePerUserSystemParameters
 
     if ($ShowHiddenItems) {
-        Write-Host "Hidden files are now visible in File Explorer."
+        Write-Host "Hidden files are now visible in File Explorer. Log out required."
     } else {
-        Write-Host "Hidden files are now hidden in File Explorer."
+        Write-Host "Hidden files are now hidden in File Explorer. Log out required."
     }
 }
 
