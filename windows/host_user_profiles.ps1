@@ -76,7 +76,8 @@ $winai__sysadmin = @{
 $winai__ptimme01 = @{
     220 = { Add-InitialGitConfig -UserName "ptimme01" -UserEmail "ptimme01@outlook.com" }
     300 = { Install-WingetApp -Id microsoft.visualstudiocode -CustomArgs "--override ""/VERYSILENT /SP- /MERGETASKS='!runcode,!desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath\'""" }
-    
+    370 = { Install-WingetApp -Id Microsoft.VisualStudio.2022.Community -CustomArgs "--custom ""--add Microsoft.VisualStudio.Workload.NativeDesktop;includeRecommended""" }
+    380 = { Install-WingetApp -Id Anaconda.Miniconda3 ; Set-Location -Path C:\Users\$env:username\miniconda3\condabin; ./conda init  }
 }
 
 $init__windev__sysadmin = @{
