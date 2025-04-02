@@ -178,11 +178,75 @@ Function Set-WslInstanceConfiguration {
     wsl.exe -d $Name
 
     wsl.exe -d $Name --user root ls $InstanceCymdeskPath
-    if ($LASTEXITCODE -ne 0) {Throw "cymdesk inside the wsl instance not found"}
+    if ($LASTEXITCODE -ne 0) { Throw "cymdesk inside the wsl instance not found" }
 
     wsl.exe -d $Name --user root find $InstanceCymdeskPath -type f -name `"*.sh`"
     wsl.exe -d $Name --user root $InstanceCymdeskPath/wsl/host_user_profiles.sh --wslName=$Name --initWsl=true
     wsl.exe -d $Name --user $UserName $InstanceCymdeskPath/wsl/host_user_profiles.sh --wslName=$Name
     
 
+}
+
+Function Set-WindowsSystemAndAppDarkMode {
+    # Set Windows to dark mode
+    $RegPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize"
+    Set-ItemProperty -Path $RegPath -Name AppsUseLightTheme -Value 0
+    Set-ItemProperty -Path $RegPath -Name SystemUsesLightTheme -Value 0
+    RUNDLL32.EXE USER32.DLL, UpdatePerUserSystemParameters
+    Write-Host "Dark mode has been enabled."
+
+}
+Function Set-WindowsFileExplorerHideFileExtensions {
+    param (
+        [bool]$HideFileExtensions
+    )
+
+    # Registry path for File Explorer settings
+    $RegPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
+
+    # Convert boolean to registry-friendly value (1 to hide, 0 to show)
+    $HideValue = if ($HideFileExtensions) { 1 } else { 0 }
+
+    Set-ItemProperty -Path $RegPath -Name HideFileExt -Value $HideValue
+    RUNDLL32.EXE USER32.DLL, UpdatePerUserSystemParameters
+
+    if ($HideFileExtensions) {
+        Write-Host "File extensions are now hidden in File Explorer."
+    } else {
+        Write-Host "File extensions are now visible in File Explorer."
+    }
+}
+
+
+Function Set-WindowsFileExplorerShowHiddenItems {
+    param (
+        [bool]$ShowHiddenItems
+    )
+
+    # Registry path for File Explorer settings
+    $RegPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
+
+    # Convert boolean to registry-friendly value (1 for show, 2 for hide)
+    $HiddenValue = if ($ShowHiddenItems) { 1 } else { 2 }
+
+    Set-ItemProperty -Path $RegPath -Name Hidden -Value $HiddenValue
+    RUNDLL32.EXE USER32.DLL, UpdatePerUserSystemParameters
+
+    if ($ShowHiddenItems) {
+        Write-Host "Hidden files are now visible in File Explorer."
+    } else {
+        Write-Host "Hidden files are now hidden in File Explorer."
+    }
+}
+
+Function Set-WindowsWallpaper {
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$WallpaperPath
+    )
+    # Set the wallpaper using the registry
+    $RegPath = "HKCU:\Control Panel\Desktop"
+    Set-ItemProperty -Path $RegPath -Name Wallpaper -Value $WallpaperPath
+    RUNDLL32.EXE USER32.DLL, UpdatePerUserSystemParameters
+    Write-Host "Wallpaper has been set to $WallpaperPath."
 }
