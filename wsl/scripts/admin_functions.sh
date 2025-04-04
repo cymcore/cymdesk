@@ -82,8 +82,8 @@ ConfigurePodman() {
         echo '[registries.search]' >> /etc/containers/registries.conf
     fi
 
-    if ! cat /etc/containers/registries.conf | grep ^unqualified-search-registries.=; then
-        echo 'unqualified-search-registries = ["docker.io", "registry.access.redhat.com", "registry.fedoraproject.org", "quay.io"]' >> /etc/containers/registries.conf
+    if ! cat /etc/containers/registries.conf | grep ^registries.=; then
+        echo 'registries = ["docker.io", "registry.access.redhat.com", "registry.fedoraproject.org", "quay.io"]' >> /etc/containers/registries.conf
     fi
    
     if ! cat /etc/sysctl.conf | grep unprivileged_port_start=0; then
