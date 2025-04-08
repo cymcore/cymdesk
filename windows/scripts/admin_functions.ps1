@@ -93,7 +93,12 @@ Function Install-Wsl {
         $Name = "main"
     }
 
-    # TODO need some check code
+    $wslInstances = wsl.exe --list --quiet
+    if ($wslInstances -contains $Name) {
+        Write-Host "The wsl instance $Name already exists, skipping installation"
+        return
+    }
+
     wsl.exe --install $DistroName --name $Name
 }
 
@@ -119,13 +124,13 @@ function Set-LocalUserEnableAndPassword {
 
 Function Set-UacAdminPrompt {
     param (
-        [Parameter(Mandatory=$true, ParameterSetName="SetA")]
+        [Parameter(Mandatory = $true, ParameterSetName = "SetA")]
         [switch]$PromptUac,
-        [Parameter(Mandatory=$true, ParameterSetName="SetB")]
+        [Parameter(Mandatory = $true, ParameterSetName = "SetB")]
         [switch]$NoPromptUac
     )
-        $regPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
-        $uacSetting = "ConsentPromptBehaviorAdmin"
+    $regPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+    $uacSetting = "ConsentPromptBehaviorAdmin"
     if ($PromptUac) {
 
         Set-ItemProperty -Path $regPath -Name $uacSetting -Value 5 -Force

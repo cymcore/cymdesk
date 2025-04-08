@@ -142,6 +142,10 @@ Function Copy-GitRepo {
     if (!(Test-Path -Path $DestinationPath)) {
         new-item -ItemType Directory -Path $DestinationPath -Force
     }
+    else {
+        write-host "Destination path $DestinationPath already exists, skipping clone"
+        return
+    }
 
     # TODO check destination path is empty or not
     Start-Process -FilePath "git" -ArgumentList "clone $GitRepoUrl $DestinationPath" -PassThru -NoNewWindow
@@ -157,12 +161,19 @@ Function Add-InitialGitConfig {
         [string]$UserEmail
     )
 
+    if (!(get-command git -ErrorAction SilentlyContinue)) {
+        throw "Git is not installed or not found in the PATH"
+    }
+    
     if (!(Test-Path -Path c:\users\$UserName\.gitconfig)) {
         git config --global user.name $UserName
         git config --global user.email $UserEmail
         git config --global core.autocrlf false
         git config --global core.eol lf
 
+    } 
+    else {
+        write-host "Git config already exists for $UserName, skipping"
     }
 }
 
@@ -174,6 +185,12 @@ Function Set-WslInstanceConfiguration {
         [string]$UserName
     )
     
+    $wslInstances = wsl.exe --list --quiet
+    if ($wslInstances -contains $Name) { 
+        Write-Host "The wsl instance $Name already exists, skipping configuration"
+        return
+    }
+
     # Interactive to set user and password 
     wsl.exe -d $Name
 
@@ -211,7 +228,8 @@ Function Set-WindowsFileExplorerHideFileExtensions {
 
     if ($HideFileExtensions) {
         Write-Host "File extensions are now hidden in File Explorer. Log out required."
-    } else {
+    }
+    else {
         Write-Host "File extensions are now visible in File Explorer. Log out required."
     }
 }
@@ -232,7 +250,8 @@ Function Set-WindowsFileExplorerShowHiddenItems {
 
     if ($ShowHiddenItems) {
         Write-Host "Hidden files are now visible in File Explorer. Log out required."
-    } else {
+    }
+    else {
         Write-Host "Hidden files are now hidden in File Explorer. Log out required."
     }
 }
