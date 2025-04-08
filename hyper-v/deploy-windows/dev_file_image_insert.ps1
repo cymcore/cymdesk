@@ -1,8 +1,14 @@
+param (
+    [Parameter(Mandatory = $true)]
+    [string]$VmName,
+    [string]$Vhd = "d:\vm\$VmName\Virtual Hard Disks\$VmName.vhdx"
+)
 
-$VmName = 'windev'
+# Assumes f: is where the vhd got mounted
+
 $UnattendFile = 'F:\unattend.xml'
 $SysadminPassword = Read-Host -AsSecureString -Prompt "Enter sysadmin password"
-Mount-VHD -Path 'D:\vm\windev\Virtual Hard Disks\windev.vhdx'
+Mount-VHD -Path $Vhd
 
 Remove-Item -path f:\unattend.xml -Force
 Remove-Item -path f:\windows\setup\scripts\SetupComplete.cmd -Force
@@ -22,7 +28,7 @@ Copy-Item -Path './common_scripts/firstlogon.ps1' -Destination 'F:\windows\setup
 $xml.Save($UnattendFile)
 
 Read-Host -Prompt "Modify any F:\ files, then press Enter to continue"
-Dismount-VHD -Path 'D:\vm\windev\Virtual Hard Disks\windev.vhdx'
+Dismount-VHD -Path $Vhd
 
 $CheckpointName = "PreDeploymentCheckpoint"
 Checkpoint-VM -Name $VmName -SnapshotName $CheckpointName

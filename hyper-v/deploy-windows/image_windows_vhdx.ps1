@@ -1,40 +1,10 @@
-Function Test-VhdxMounted {
-    param (
-        [string]$VHDXPath
-    )
+### Source Files
+. $PSScriptRoot\utils_pshelper.ps1
+. $PSScriptRoot\utils_windows.ps1
+. $PSScriptRoot\utils_hyperv.ps1
 
-    $VhdObject = Get-VHD -Path $VHDXPath 
- 
-    if ($null -eq ($VhdObject).number) {
-        return $false
-    }
-    else {
-        return $true
-    }
 
-}
-Function Mount-VhdxDisk {
-    param (
-        [string]$VHDXPath
-    )
 
-    $VhdxMount = Mount-VHD -Path $VHDXPath -Passthru
-    $DiskNumber = ($VhdxMount | Get-Disk).Number
-    $DiskNumber
-}
-Function Initialize-VhdxDisk {
-    param (
-        [UInt32]$DiskNumber
-    )
-
-    if ((Get-Disk -Number $DiskNumber).PartitionStyle -eq "RAW") {
-        Initialize-Disk -Number $DiskNumber -PartitionStyle GPT
-    }
-    else {
-        Clear-Disk -Number $DiskNumber -RemoveData -Confirm:$false
-        Initialize-Disk -Number $DiskNumber -PartitionStyle GPT
-    }
-}
 Function New-UefiPartitionDisk {
     param(
         [Parameter(Mandatory = $true)]
@@ -42,12 +12,20 @@ Function New-UefiPartitionDisk {
         [Parameter(Mandatory = $true)]
         [string]$VmPath
     )
+    ### Defined Variables
 
-    if ((Get-VM -Name $VmName).state -eq "On") { Throw "VM must not running to add GPU partition" }
+    ### Derived Variables
 
     $VHDXPath = ($VmPath + $VmName + "\Virtual Hard Disks\" + $VmName + ".vhdx")
 
-    if (Test-VhdxMounted -VHDXPath $VHDXPath) { Dismount-VHD -Path $VHDXPath }
+    ### Run Pre-Checks
+    if (!(Test-IsAdmin)) { Throw "Please run as administrator"}
+    if ((Get-VM -Name $VmName).state -eq "On") { Throw "VM must not running to initialize it's disk" }
+
+    if (Test-IsVhdxMounted -VHDXPath $VHDXPath) { 
+        Show-OptionalUserExitAndContinue -Message "VHDX is already mounted, continuing will dismount the disk"
+        Dismount-VHD -Path $VHDXPath 
+    }
 
     $DiskNumber = Mount-VhdxDisk -VHDXPath $VHDXPath
 
@@ -84,32 +62,6 @@ Function New-UefiPartitionDisk {
 
 }
 
-Function Mount-ISOReliable {
-    param (
-        [string]$SourcePath
-    )
-    $mountResult = Mount-DiskImage -ImagePath $SourcePath
-    $delay = 0
-    Do {
-        if ($delay -gt 15) {
-            Function Get-NewDriveLetter {
-                $UsedDriveLetters = ((Get-Volume).DriveLetter) -join ""
-                Do {
-                    $DriveLetter = (65..90) | Get-Random | ForEach-Object { [char]$_ }
-                }
-                Until (!$UsedDriveLetters.Contains("$DriveLetter"))
-                $DriveLetter
-            }
-            $DriveLetter = "$(Get-NewDriveLetter)" + ":"
-            Get-WmiObject -Class Win32_volume | Where-Object { $_.Label -eq "CCCOMA_X64FRE_EN-US_DV9" } | Set-WmiInstance -Arguments @{DriveLetter = "$driveletter" }
-        }
-        Start-Sleep -s 1 
-        $delay++
-    }
-    Until ($NULL -ne ($mountResult | Get-Volume).DriveLetter)
-    ($mountResult | Get-Volume).DriveLetter
-}
-
 Function Deploy-OsImage {
     param(
         [Parameter(Mandatory = $true)]
@@ -140,26 +92,26 @@ Function Deploy-OsConfig {
         [string]$VmName,
         [Parameter(Mandatory = $true)]
         [string]$FullVmConfigDir
-        )
+    )
 
-        if (!($SysadminPassword)){$SysadminPassword = Read-Host -AsSecureString -Prompt "Enter sysadmin password"}
+    if (!($SysadminPassword)) { $SysadminPassword = Read-Host -AsSecureString -Prompt "Enter sysadmin password" }
         
-        $UnattendFile = $WindowsDriveLetter + ":\unattend.xml"
-        $ScriptsDir = $WindowsDriveLetter + ":\Windows\Setup\Scripts\"
+    $UnattendFile = $WindowsDriveLetter + ":\unattend.xml"
+    $ScriptsDir = $WindowsDriveLetter + ":\Windows\Setup\Scripts\"
   
         
-        New-Item -ItemType Directory -Path $ScriptsDir -Force
+    New-Item -ItemType Directory -Path $ScriptsDir -Force
  
-        Copy-Item -Path ($PSScriptRoot + "\common_scripts\unattend.xml") -Destination $UnattendFile
-        Copy-Item -Path ($PSScriptRoot + "\common_scripts\SetupComplete.cmd") -Destination $ScriptsDir
-        Copy-Item -Path ($PSScriptRoot + "\common_scripts\SetupComplete.ps1") -Destination $ScriptsDir
-        Copy-Item -Path ($PSScriptRoot + "\common_scripts\firstlogon.ps1") -Destination $ScriptsDir
+    Copy-Item -Path ($PSScriptRoot + "\common_scripts\unattend.xml") -Destination $UnattendFile
+    Copy-Item -Path ($PSScriptRoot + "\common_scripts\SetupComplete.cmd") -Destination $ScriptsDir
+    Copy-Item -Path ($PSScriptRoot + "\common_scripts\SetupComplete.ps1") -Destination $ScriptsDir
+    Copy-Item -Path ($PSScriptRoot + "\common_scripts\firstlogon.ps1") -Destination $ScriptsDir
       
-        [xml]$xml = get-content -path $UnattendFile
-        ($xml.unattend.settings.component | where-object {$_.autologon}).autologon.password.value = ([System.Net.NetworkCredential]::new("", $SysadminPassword).Password)
-        ($xml.unattend.settings.component | where-object {$_.UserAccounts}).UserAccounts.LocalAccounts.localaccount.Password.Value = ([System.Net.NetworkCredential]::new("", $SysadminPassword).Password)
-        ($xml.unattend.settings.component | where-object {$_.Computername}).Computername = $VmName
-        $xml.Save($UnattendFile)
+    [xml]$xml = get-content -path $UnattendFile
+        ($xml.unattend.settings.component | where-object { $_.autologon }).autologon.password.value = ([System.Net.NetworkCredential]::new("", $SysadminPassword).Password)
+        ($xml.unattend.settings.component | where-object { $_.UserAccounts }).UserAccounts.LocalAccounts.localaccount.Password.Value = ([System.Net.NetworkCredential]::new("", $SysadminPassword).Password)
+        ($xml.unattend.settings.component | where-object { $_.Computername }).Computername = $VmName
+    $xml.Save($UnattendFile)
 }
 Function New-OsImageDeploy {
     param(
@@ -175,6 +127,10 @@ Function New-OsImageDeploy {
         [string]$FullVmConfigDir
         
     )
+    ### Run Pre-Checks
+    if (!(Test-IsAdmin)) { Throw "Please run as administrator"}
+    if (!(Test-Path -Path $VmPath)) { Throw "VmPath ($VmPath) not found"}
+    if (!(test-path $FullVmConfigDir)) { Throw "VmConfigDir ($FullVmConfigDir) not found"}
 
     $VmDriveLetters = New-UefiPartitionDisk -VmName $VmName -VmPath $VmPath
     $WindowsIsoDriveLetter = Mount-ISOReliable -SourcePath $WindowsIso.WindowsIsoPath

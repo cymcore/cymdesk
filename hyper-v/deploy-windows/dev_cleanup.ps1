@@ -2,41 +2,12 @@ param (
     [Parameter(Mandatory = $true)]
     [string]$VmConfigDir
 )
-Function Test-Admin {
-    <#
-                .SYNOPSIS
-                    Short function to determine whether the logged-on user is an administrator.
 
-                .EXAMPLE
-                    Do you honestly need one?  There are no parameters!
+### Source Files
+. $PSScriptRoot\utils_pshelper.ps1
+. $PSScriptRoot\utils_windows.ps1
+. $PSScriptRoot\utils_hyperv.ps1
 
-                .OUTPUTS
-                    $true if user is admin.
-                    $false if user is not an admin.
-            #>
-    [CmdletBinding()]
-    param()
-
-    $currentUser = New-Object Security.Principal.WindowsPrincipal $([Security.Principal.WindowsIdentity]::GetCurrent())
-    $isAdmin = $currentUser.IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)
- 
-    return $isAdmin
-}
-Function Test-VhdxMounted {
-    param (
-        [string]$VHDXPath
-    )
-
-    $VhdObject = Get-VHD -Path $VHDXPath 
- 
-    if ($null -eq ($VhdObject).number) {
-        return $false
-    }
-    else {
-        return $true
-    }
-
-}
 ### Error Handling
 $ErrorActionPreference = "Stop"
 $PSNativeCommandUseErrorActionPreference = $true
@@ -47,14 +18,13 @@ $ConfigsDir = ($PSScriptRoot + "\vm_configs")
 ### Derived Variables
 
 ### Run Checks
-if (!(Test-Admin)) { Throw "Please run as administrator" }
+if (!(Test-IsAdmin)) { Throw "Please run as administrator" }
 if (!(Test-Path -Path $ConfigsDir)) { Throw "VmConfigsDir ($ConfigsDir) not found" }
 if (!(Test-Path -Path ($ConfigsDir + "\" + $VmConfigDir))) { Throw "VmConfigDir ($VmConfigDir) not found" }
 if (!(Test-Path -Path ($ConfigsDir + "\" + $VmConfigDir + "\" + "config.ps1"))) { Throw "Config file (config.ps1) not found" }
 
 ### Source Files
 . ($ConfigsDir + "\" + $VmConfigDir + "\" + "config.ps1")
-
 
 ### Main
 $vmName = $vm_config.VmName
@@ -82,7 +52,7 @@ if ($vmExists) {
 
 $VHDXPath = ($VmPath + $VmName + "\Virtual Hard Disks\" + $VmName + ".vhdx")
 
-if (Test-VhdxMounted -VHDXPath $VHDXPath) { Dismount-VHD -Path $VHDXPath }
+if (Test-IsVhdxMounted -VHDXPath $VHDXPath) { Dismount-VHD -Path $VHDXPath }
 
 $directoryPath = ($VmPath + $VmName)
 

@@ -1,6 +1,8 @@
 param (
     [Parameter(Mandatory = $true)]
-    [string]$VmConfigDir
+    [string]$VmConfigDir,
+    [string]$ConfigsDir = ($PSScriptRoot + "\vm_configs"),
+    [string]$LogFile
 )
 
 ### Error Handling
@@ -38,55 +40,45 @@ Function Show-ErrorAndStackTrace {
     }
 }
 
-### Defined Variables
-$ConfigsDir = ($PSScriptRoot + "\vm_configs") 
-
-### Derived Variables
-
-$FullVmConfigDir = ($ConfigsDir + "\" + $VmConfigDir)
-Function Test-Admin {
-    <#
-                .SYNOPSIS
-                    Short function to determine whether the logged-on user is an administrator.
-
-                .EXAMPLE
-                    Do you honestly need one?  There are no parameters!
-
-                .OUTPUTS
-                    $true if user is admin.
-                    $false if user is not an admin.
-            #>
-    [CmdletBinding()]
-    param()
-
-    $currentUser = New-Object Security.Principal.WindowsPrincipal $([Security.Principal.WindowsIdentity]::GetCurrent())
-    $isAdmin = $currentUser.IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)
- 
-    return $isAdmin
-}
-
-
-
-### Run Checks
-if (!(Test-Admin)) { Throw "Please run as administrator"}
-if (!(Test-Path -Path $ConfigsDir)) { Throw "VmConfigsDir ($ConfigsDir) not found"}
-if (!(Test-Path -Path ($FullVmConfigDir))) { Throw "VmConfigDir ($VmConfigDir) not found"}
-if (!(Test-Path -Path ($FullVmConfigDir + "\" + "config.ps1"))) { Throw "Config file (config.ps1) not found"}
-
 ### Source Files
-. ($FullVmConfigDir + "\" + "config.ps1")
-. $PSScriptRoot\create_vm.ps1
+. $PSScriptRoot\utils_pshelper.ps1
+. $PSScriptRoot\utils_windows.ps1
+. $PSScriptRoot\new_hyperv_vm.ps1
 . $PSScriptRoot\image_windows_vhdx.ps1
 
+### Defined Variables
+
+### Derived Variables
+$FullVmConfigDir = (join-path -path $ConfigsDir -childpath $VmConfigDir)
+
+### Run Pre-Checks
+if (!(Test-Path -Path $ConfigsDir)) { Throw "VmConfigsDir ($ConfigsDir) not found" }
+if (!(Test-Path -Path ($FullVmConfigDir))) { Throw "VmConfigDir ($VmConfigDir) not found" }
+if (!(Test-Path -Path ($FullVmConfigDir + "\" + "config.ps1"))) { Throw "Config file (config.ps1) not found" }
+if (!(Test-IsAdmin)) { Throw "Please run as administrator" }
+
+### Source Config File
+. ($FullVmConfigDir + "\" + "config.ps1")
+
 ### Main
+if (!($SysadminPassword)) {
 $SysadminPassword = Read-Host -AsSecureString -Prompt "Enter sysadmin password"
+}
 
 New-HyperVVm @vm_config
 
-New-OsImageDeploy -VmName $vm_config.VmName -VmPath $vm_config.VmPath -WindowsIso $windows_iso -OsConfig $os_config -FullVmConfigDir $FullVmConfigDir
+$OsImageDeployConfig = @{
+    VmName          = $vm_config.VmName
+    VmPath          = $vm_config.VmPath
+    WindowsIso      = $windows_iso
+    OsConfig        = $os_config
+    FullVmConfigDir = $FullVmConfigDir
+} 
+
+New-OsImageDeploy @OsImageDeployConfig
 
 if ($vm_config.AssignGpuParition) {
-    . $PSScriptRoot\update_vm_gpu_files.ps1 -VmName $vm_config.VmName -VmPath $vm_config.VmPath 
+    . $PSScriptRoot\update_vm_gpu_files.ps1 -VmName $vm_config.VmName
 }
 
 Start-VM -Name $vm_config.VmName

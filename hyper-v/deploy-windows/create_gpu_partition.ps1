@@ -1,98 +1,86 @@
-Function Get-DesktopPC {
-    $isDesktop = $true
-    if (Get-WmiObject -Class win32_systemenclosure | Where-Object { $_.chassistypes -eq 9 -or $_.chassistypes -eq 10 -or $_.chassistypes -eq 14 }) {
-        Write-Warning "Computer is a laptop. Laptop dedicated GPU's that are partitioned and assigned to VM may not work" 
-        Write-Warning "Thunderbolt 3 or 4 dock based GPU's may work"
-        $isDesktop = $false 
+### Source Files
+. $PSScriptRoot\utils_pshelper.ps1
+. $PSScriptRoot\utils_windows.ps1
+. $PSScriptRoot\utils_gpu-p.ps1
+
+Function Set-VmConfigForGpuPartition {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$VmName
+    )
+    ### Run Pre-Checks
+    if (!(Test-IsAdmin)) { Throw "Please run as administrator" }
+    if (!(Get-VM -Name $VmName -ErrorAction SilentlyContinue)) { Throw "VM must exist to add GPU partition" }
+    if ((Get-VM -Name $VmName).state -eq "On") { Throw "VM must not running to add GPU partition" }
+
+    ### Defined Variables
+    $VmConfigForGpuPartition = @{
+        VmName                      = $VmName
+        LowMemoryMappedIoSpace      = 3GB
+        HighMemoryMappedIoSpace     = 32GB
+        GuestControlledCacheTypes   = $true
+        AutomaticStopAction         = "ShutDown"
+        AutomaticCheckpointsEnabled = $false
+        CheckpointType              = "Standard"
     }
-    if (Get-WmiObject -Class win32_battery)
-    { $isDesktop = $false }
-    $isDesktop
+
+    ### Set VM properties for a gpu partition
+    Set-Vm @VmConfigForGpuPartition
+    Set-VMMemory -VMName $VmName -DynamicMemoryEnabled $false
+
 }
 
-Function Get-WindowsCompatibleOs {
-    $build = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion'
-    if ($build.CurrentBuild -ge 19041 -and ($($build.editionid -like 'Professional*') -or $($build.editionid -like 'Enterprise*') -or $($build.editionid -like 'Education*'))) {
-        Return $true
-    }
-    Else {
-        Write-Warning "Only Windows 10 20H1 or Windows 11 (Pro or Enterprise) is supported"
-        Return $false
-    }
-}
+Function Set-GpuPartitionConfiguration {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$VmName
+    )
+    ### Run Pre-Checks
+    if (!(Test-IsAdmin)) { Throw "Please run as administrator" }
+    if (!(Get-VM -Name $VmName -ErrorAction SilentlyContinue)) { Throw "VM must exist to add GPU partition" }
+    if ((Get-VM -Name $VmName).state -eq "On") { Throw "VM must not running to add GPU partition" }
 
-Function Get-HyperVEnabled {
-    if (Get-WindowsOptionalFeature -Online | Where-Object FeatureName -Like 'Microsoft-Hyper-V-All') {
-        Return $true
-    }
-    Else {
-        Write-Warning "You need to enable Virtualisation in your motherboard and then add the Hyper-V Windows Feature and reboot"
-        Return $false
-    }
-}
+    $GpuDevice = Get-GpuVmPartitionAdapterDevice
 
-Function Get-IsWindows10 {
-
-    $osVersion = (Get-CimInstance Win32_OperatingSystem).Caption
-    
-    # Check if the OS contains "Windows 10" but NOT "Server" or "Windows 11"
-    if ($osVersion -match "Windows 10" -and $osVersion -notmatch "Server") {
-        return $true
-    }
-    else {
-        return $false
-    }
-}
-Function Get-GpuVmPartitionAdapterName {
-    $isWindows10 = Get-IsWindows10
-    
-    if ($isWindows10) {
-        $GpuName = "AUTO"
-    }
-    else {
-        $Devices = (Get-WmiObject -Class "Msvm_PartitionableGpu" -ComputerName $env:COMPUTERNAME -Namespace "ROOT\virtualization\v2").name
-        if ($Devices.Count -gt 1) {
-            Throw "More than one GPU found."
-            exit 1
-        } 
-
-        $GpuParse = $Devices.Split('#')[1] 
-        $GpuName = Get-WmiObject Win32_PNPSignedDriver | where-object { ($_.HardwareID -eq "PCI\$GpuParse") } | select-object DeviceName -ExpandProperty DeviceName
-      
-    }
-    $GpuName
+    Set-VMGpuPartitionAdapter -VMName $VmName `
+        -MinPartitionVRAM $GpuDevice.MinPartitionVRAM `
+        -MaxPartitionVRAM $GpuDevice.MaxPartitionVRAM `
+        -OptimalPartitionVRAM $GpuDevice.OptimalPartitionVRAM `
+        -MinPartitionEncode $GpuDevice.MinPartitionEncode `
+        -MaxPartitionEncode $GpuDevice.MaxPartitionEncode `
+        -OptimalPartitionEncode $GpuDevice.OptimalPartitionEncode `
+        -MinPartitionDecode $GpuDevice.MinPartitionDecode `
+        -MaxPartitionDecode $GpuDevice.MaxPartitionDecode `
+        -OptimalPartitionDecode $GpuDevice.OptimalPartitionDecode `
+        -MinPartitionCompute $GpuDevice.MinPartitionCompute `
+        -MaxPartitionCompute $GpuDevice.MaxPartitionCompute `
+        -OptimalPartitionCompute $GpuDevice.OptimalPartitionCompute
 }
 Function Add-GpuVmPartitionAdapter {
     param(
+        [Parameter(Mandatory = $true)]
         [string]$VmName
     )
-
-    # Check HOST (not VM) compatibility
-    If (!((Get-DesktopPC) -and (Get-WindowsCompatibleOS) -and (Get-HyperVEnabled))) {
-        Throw "Your system is not compatible with GPU partitioning"
-    }
-
-
-    $vm = Get-VM -Name $VmName -ErrorAction SilentlyContinue
-    if (!($vm)) {Throw "VM must exist to add GPU partition"}
-    if ((Get-VM -Name $VmName).state -eq "On") {Throw "VM must not running to add GPU partition"}
+    ### Run Pre-Checks
+    if (!(Test-IsAdmin)) { Throw "Please run as administrator" }
+    if (!(Test-IsDesktopPC)) { Throw "This script is only for desktop systems" }
+    if (!(Get-GpuWindowsCompatibleOs)) { Throw "This script is only for Windows 10 20H1 or Windows 11 (Pro or Enterprise)" }
+    if (!(Test-IsHyperVEnabled)) { Throw "You need to enable hyper-v" }
+    if (!(Get-VM -Name $VmName -ErrorAction SilentlyContinue)) { Throw "VM must exist to add GPU partition" }
+    if ((Get-VM -Name $VmName).state -eq "On") { Throw "VM must not running to add GPU partition" }
     
-    $GpuName = Get-GpuVmPartitionAdapterName
+    Set-VmConfigForGpuPartition -VmName $VmName
 
-    Set-VM -Name $VmName -LowMemoryMappedIoSpace 3GB -HighMemoryMappedIoSpace 32GB -GuestControlledCacheTypes $true -AutomaticStopAction ShutDown -AutomaticCheckpointsEnabled $false -CheckpointType Standard 
-    Set-VMMemory -VMName $VmName -DynamicMemoryEnabled $false
+    $GpuName = Get-GpuVmPartitionAdapterName
     
     if ($GpuName -eq "AUTO") {
         Add-VMGpuPartitionAdapter -VMName $VmName
     }
     else {
-        $PartitionableGPUList = Get-WmiObject -Class "Msvm_PartitionableGpu" -ComputerName $env:COMPUTERNAME -Namespace "ROOT\virtualization\v2" 
-        $DeviceID = ((Get-WmiObject Win32_PNPSignedDriver | where-object { ($_.Devicename -eq "$GpuName") }).hardwareid).split('\')[1]
-        $DevicePathName = ($PartitionableGPUList | Where-Object name -like "*$deviceid*").Name
-        Add-VMGpuPartitionAdapter -VMName $VmName -InstancePath $DevicePathName
-
+        Add-VMGpuPartitionAdapter -VMName $VmName -InstancePath $((Get-GpuVmPartitionAdapterDevice).Name)
     }
     
+    Set-GpuPartitionConfiguration -VmName $VmName
 }
 
 
