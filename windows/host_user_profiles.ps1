@@ -60,7 +60,7 @@ $init__winai__sysadmin = @{
     300 = { $WingetFilePath = "C:\Users\$($env:USERNAME)\AppData\Local\Microsoft\WindowsApps\winget.exe" ; $counter = 0 ; while (!(test-path -path $WingetFilePath) -and ($counter -lt 30)) { Start-Sleep -Seconds 10 ; write-host $counter ; $counter++ } }
     301 = { Install-WingetApp -Id git.git -CustomArgs "--scope machine" }
     302 = { Install-WingetApp -Id Microsoft.PowerShell -CustomArgs "--source winget" }
-    800 = { powershell.exe -executionpolicy bypass -file $env:AUTOWINPATH\winauto.ps1 -action trigger ; powershell.exe -executionpolicy bypass -command "Start-Sleep -Seconds 10"}
+    800 = { powershell.exe -executionpolicy bypass -file $env:AUTOWINPATH\winauto.ps1 -action trigger ; powershell.exe -executionpolicy bypass -command "Start-Sleep -Seconds 10" }
     900 = { Restart-Computer -Force }
 }
 
@@ -77,7 +77,8 @@ $winai__ptimme01 = @{
     220 = { Add-InitialGitConfig -UserName "ptimme01" -UserEmail "ptimme01@outlook.com" }
     300 = { Install-WingetApp -Id microsoft.visualstudiocode -CustomArgs "--override ""/VERYSILENT /SP- /MERGETASKS='!runcode,!desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath\'""" }
     370 = { Install-WingetApp -Id Microsoft.VisualStudio.2022.Community -CustomArgs "--custom ""--add Microsoft.VisualStudio.Workload.NativeDesktop;includeRecommended""" }
-    380 = { Install-WingetApp -Id Anaconda.Miniconda3 ; Set-Location -Path C:\Users\$env:username\miniconda3\condabin; ./conda init  }
+    380 = { Install-WingetApp -Id Anaconda.Miniconda3 ; Set-Location -Path C:\Users\$env:username\miniconda3\condabin; ./conda init }
+    600 = { Set-WindowsSystemAndAppDarkMode ; Set-WindowsFileExplorerHideFileExtensions -HideFileNameExtensions $false ; Set-WindowsFileExplorerShowHiddenItems -ShowHiddenItems $true }
 }
 
 $init__windev__sysadmin = @{
@@ -91,7 +92,7 @@ $init__windev__sysadmin = @{
     300 = { $WingetFilePath = "C:\Users\$($env:USERNAME)\AppData\Local\Microsoft\WindowsApps\winget.exe" ; $counter = 0 ; while (!(test-path -path $WingetFilePath) -and ($counter -lt 30)) { Start-Sleep -Seconds 10 ; write-host $counter ; $counter++ } }
     301 = { Install-WingetApp -Id git.git -CustomArgs "--scope machine" }
     302 = { Install-WingetApp -Id Microsoft.PowerShell -CustomArgs "--source winget" }
-    800 = { powershell.exe -executionpolicy bypass -file $env:AUTOWINPATH\winauto.ps1 -action trigger ; powershell.exe -executionpolicy bypass -command "Start-Sleep -Seconds 10"}
+    800 = { powershell.exe -executionpolicy bypass -file $env:AUTOWINPATH\winauto.ps1 -action trigger ; powershell.exe -executionpolicy bypass -command "Start-Sleep -Seconds 10" }
     900 = { Restart-Computer -Force }
 }
 
@@ -102,22 +103,25 @@ $windev__sysadmin = @{
     201 = { Set-LocalUserEnableAndPassword -UserName "ptimme01" }
     210 = { Add-LocalUserRdpGroup -UserName "ptimme01" }
     300 = { Install-WingetApp -Id microsoft.visualstudiocode -CustomArgs "--override ""/VERYSILENT /SP- /MERGETASKS='!runcode,!desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath\'""" }
+    
 }
 
 $windev__ptimme01 = @{
     220 = { Add-InitialGitConfig -UserName "ptimme01" -UserEmail "ptimme01@outlook.com" }
     300 = { Install-WingetApp -Id microsoft.visualstudiocode -CustomArgs "--override ""/VERYSILENT /SP- /MERGETASKS='!runcode,!desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath\'""" }
-    340 = { Install-Wsl -DistroName "Ubuntu-24.04" -Name main}
-    345 = { Copy-GitRepo -GitRepoUrl "https://github.com/cymcore/cymdesk.git" -DestinationPath "C:\xfer\cymdesk"}
-    350 = { Set-WslInstanceConfiguration -Name main -UserName ptimme01 -InstanceCymdeskPath "/mnt/c/xfer/cymdesk"}
+    340 = { Install-Wsl -DistroName "Ubuntu-24.04" -Name main }
+    345 = { Copy-GitRepo -GitRepoUrl "https://github.com/cymcore/cymdesk.git" -DestinationPath "C:\xfer\cymdesk" }
+    350 = { Set-WslInstanceConfiguration -Name main -UserName ptimme01 -InstanceCymdeskPath "/mnt/c/xfer/cymdesk" }
+    600 = { Set-WindowsSystemAndAppDarkMode ; Set-WindowsFileExplorerHideFileExtensions -HideFileNameExtensions $false ; Set-WindowsFileExplorerShowHiddenItems -ShowHiddenItems $true }
 }
 
 $north__ptimme01 = @{
     220 = { Add-InitialGitConfig -UserName "ptimme01" -UserEmail "ptimme01@outlook.com" }
     300 = { Install-WingetApp -Id microsoft.visualstudiocode -CustomArgs "--override ""/VERYSILENT /SP- /MERGETASKS='!runcode,!desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath\'""" }
-    340 = { Install-Wsl -DistroName "Ubuntu-24.04" -Name main}
-    345 = { Copy-GitRepo -GitRepoUrl "https://github.com/cymcore/cymdesk.git" -DestinationPath "C:\xfer\cymdesk"}
-    350 = { Set-WslInstanceConfiguration -Name main -UserName ptimme01 -InstanceCymdeskPath "/mnt/c/xfer/cymdesk"}
+    340 = { Install-Wsl -DistroName "Ubuntu-24.04" -Name main }
+    345 = { Copy-GitRepo -GitRepoUrl "https://github.com/cymcore/cymdesk.git" -DestinationPath "C:\xfer\cymdesk" }
+    350 = { Set-WslInstanceConfiguration -Name main -UserName ptimme01 -InstanceCymdeskPath "/mnt/c/xfer/cymdesk" }
+    600 = { Set-WindowsSystemAndAppDarkMode ; Set-WindowsFileExplorerHideFileExtensions -HideFileNameExtensions $false ; Set-WindowsFileExplorerShowHiddenItems -ShowHiddenItems $true }
 }
 
 ### Set HostUserProfile (depends on if called with -Init)
@@ -131,7 +135,7 @@ else {
 ### Run functions
 if ($null -ne $HostUserProfile -and $HostUserProfile -is [hashtable]) {
     foreach ($script in $HostUserProfile.GetEnumerator() | Sort-Object Key) {
-            & $script.Value   
+        & $script.Value   
     }
 }
 
