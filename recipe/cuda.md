@@ -1,0 +1,1 @@
+podman run -itd --device $(nvidia-ctk cdi list|grep nvidia) -v /mnt/c/xfer:/xfer --hostname cuda --name cuda nvidia/cuda:12.6.3-cudnn-devel-ubuntu24.04 /bin/bash
