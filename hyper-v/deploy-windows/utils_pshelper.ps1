@@ -33,3 +33,24 @@ function Show-OptionalUserExitAndContinue {
         }
     }
 }
+
+function Show-Countdown {
+    [CmdletBinding()]
+    param (
+        [string]$Message = "Message",
+        [Int64]$timeout = 10,
+        [ValidateSet("Green", "Yellow", "Red")]
+        [string]$color = "Yellow"
+    )
+    Write-Host $Message -ForegroundColor $color
+    Write-Host "Continuing in: " -ForegroundColor $color -NoNewline
+   
+    $counter = 0
+    while (($counter) -lt $timeout) {
+        # Countdown logic and display)
+        write-host "$($timeout - $counter)  " -NoNewline
+        if ($($timeout - $counter) -eq 1) { write-host("`r") }
+        Start-Sleep -Seconds 1
+        $counter++
+    }
+}
