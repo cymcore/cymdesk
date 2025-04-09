@@ -186,13 +186,13 @@ Function Set-WslInstanceConfiguration {
     )
     
     $wslInstances = wsl.exe --list --quiet
-    if ($wslInstances -contains $Name) { 
-        Write-Host "The wsl instance $Name already exists, skipping configuration"
-        return
-    }
+    if (!($wslInstances -contains $Name)) { Throw "The wsl instance $Name does not exist" }
 
     # Interactive to set user and password 
     wsl.exe -d $Name
+
+    wsl.exe -d $Name --user root stat /root/.cym_bashrc
+    if ($LASTEXITCODE -ne 0) { Throw "Wsl instance had already been configured previously" }
 
     wsl.exe -d $Name --user root ls $InstanceCymdeskPath
     if ($LASTEXITCODE -ne 0) { Throw "cymdesk inside the wsl instance not found" }
@@ -266,4 +266,24 @@ Function Set-WindowsWallpaper {
     Set-ItemProperty -Path $RegPath -Name Wallpaper -Value $WallpaperPath
     RUNDLL32.EXE USER32.DLL, UpdatePerUserSystemParameters
     Write-Host "Wallpaper has been set to $WallpaperPath."
+}
+
+Function Install-WslDistribution {
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$DistroName, 
+        [string]$Name
+    )
+
+    if (! $Name) {
+        $Name = "main"
+    }
+
+    $wslInstances = wsl.exe --list --quiet
+    if ($wslInstances -contains $Name) {
+        Write-Host "The wsl instance $Name already exists, skipping installation"
+        return
+    }
+
+    wsl.exe --install $DistroName --name $Name
 }

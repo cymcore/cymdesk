@@ -83,24 +83,10 @@ Function Set-RdpOn {
 }
 
 Function Install-Wsl {
-    param (
-        [Parameter(Mandatory = $true)]
-        [string]$DistroName, 
-        [string]$Name
-    )
 
-    if (! $Name) {
-        $Name = "main"
-    }
-
-    $wslInstances = wsl.exe --list --quiet
-    if ($wslInstances -contains $Name) {
-        Write-Host "The wsl instance $Name already exists, skipping installation"
-        return
-    }
-
-    wsl.exe --install $DistroName --name $Name
+    wsl --install --no-distribution
 }
+
 
 Function Add-LocalUserRdpGroup {
     param(

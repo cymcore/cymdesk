@@ -88,7 +88,7 @@ $init__windev__sysadmin = @{
     160 = { New-LocalSmbShare -DirPath "C:\xfer" -ShareName "xfer" }
     190 = { Set-AutoLogonCountFix }
     220 = { Set-VirtualizationFeaturesAll }
-    240 = { Install-Wsl -DistroName "Ubuntu-24.04" }
+    240 = { Install-Wsl }
     300 = { $WingetFilePath = "C:\Users\$($env:USERNAME)\AppData\Local\Microsoft\WindowsApps\winget.exe" ; $counter = 0 ; while (!(test-path -path $WingetFilePath) -and ($counter -lt 30)) { Start-Sleep -Seconds 10 ; write-host $counter ; $counter++ } }
     301 = { Install-WingetApp -Id git.git -CustomArgs "--scope machine" }
     302 = { Install-WingetApp -Id Microsoft.PowerShell -CustomArgs "--source winget" }
@@ -109,7 +109,7 @@ $windev__sysadmin = @{
 $windev__ptimme01 = @{
     220 = { Add-InitialGitConfig -UserName "ptimme01" -UserEmail "ptimme01@outlook.com" }
     300 = { Install-WingetApp -Id microsoft.visualstudiocode -CustomArgs "--override ""/VERYSILENT /SP- /MERGETASKS='!runcode,!desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath\'""" }
-    340 = { Install-Wsl -DistroName "Ubuntu-24.04" -Name main }
+    340 = { Install-WslDistribution -DistroName "Ubuntu-24.04" -Name main }
     345 = { Copy-GitRepo -GitRepoUrl "https://github.com/cymcore/cymdesk.git" -DestinationPath "C:\xfer\cymdesk" }
     350 = { Set-WslInstanceConfiguration -Name main -UserName ptimme01 -InstanceCymdeskPath "/mnt/c/xfer/cymdesk" }
     600 = { Set-WindowsSystemAndAppDarkMode ; Set-WindowsFileExplorerHideFileExtensions -HideFileNameExtensions $false ; Set-WindowsFileExplorerShowHiddenItems -ShowHiddenItems $true }
@@ -118,7 +118,7 @@ $windev__ptimme01 = @{
 $north__ptimme01 = @{
     220 = { Add-InitialGitConfig -UserName "ptimme01" -UserEmail "ptimme01@outlook.com" }
     300 = { Install-WingetApp -Id microsoft.visualstudiocode -CustomArgs "--override ""/VERYSILENT /SP- /MERGETASKS='!runcode,!desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath\'""" }
-    340 = { Install-Wsl -DistroName "Ubuntu-24.04" -Name main }
+    340 = { Install-WslDistribution -DistroName "Ubuntu-24.04" -Name main }
     345 = { Copy-GitRepo -GitRepoUrl "https://github.com/cymcore/cymdesk.git" -DestinationPath "C:\xfer\cymdesk" }
     350 = { Set-WslInstanceConfiguration -Name main -UserName ptimme01 -InstanceCymdeskPath "/mnt/c/xfer/cymdesk" }
     600 = { Set-WindowsSystemAndAppDarkMode ; Set-WindowsFileExplorerHideFileExtensions -HideFileNameExtensions $false ; Set-WindowsFileExplorerShowHiddenItems -ShowHiddenItems $true }
