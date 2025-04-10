@@ -220,3 +220,45 @@ Function Test-IsAdmin {
  
     return $isAdmin
 }
+
+Function Install-PowershellWingetClient {
+
+    Install-PackageProvider -Name NuGet -Force | Out-Null
+    Install-Module -Name Microsoft.WinGet.Client -Force -Repository PSGallery | Out-Null
+} 
+
+
+Function Update-Winget {
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$WingetFilePath
+    )
+    $WingetFilePath = "C:\Users\$($env:USERNAME)\AppData\Local\Microsoft\WindowsApps\winget.exe"
+    
+    # Check if winget is installed
+    if (!(Test-Path -Path $WingetFilePath)) { throw "Winget is not installed." }
+
+    # Check powershell winget powershell module is installed
+    $WingetModule = Get-Module -Name Microsoft.WinGet.Client -ListAvailable
+    if (!($WingetModule)) { throw "Powershell Microsoft.WinGet.Client module is not installed." }
+
+    Repair-WinGetPackageManager -Force -Latest
+}
+
+Set-InitialWingetEnvironment {
+    $WingetFilePath = "C:\Users\$($env:USERNAME)\AppData\Local\Microsoft\WindowsApps\winget.exe"
+    
+    # After windows sysadmin loads wait for winget to be installed
+    $counter = 0
+    while (!(test-path -path $WingetFilePath) -and ($counter -lt 30)) {
+        write-host "Waiting for winget, $(300 - $counter*10) seconds left before giving up"
+        Start-Sleep -Seconds 10
+        $counter++ 
+    }
+
+    if (!(Test-Path -Path $WingetFilePath)) { throw "Winget is not installed." }
+
+    Install-PowershellWingetClient
+    Update-Winget
+
+}
