@@ -43,7 +43,8 @@ Function Set-StaticIpAddress {
     )
 
     # -Dhcp Disabled parameter in Set-NetIPInterface does not work on a disconnected interface
-    $SingleNetInterfaceIndex = (Get-NetIPInterface | Where-Object { $_.AddressFamily -eq "Ipv4" -and $_.ifIndex -ne 1 }).ifIndex
+    $SingleNetInterfaceIndex = (Get-NetIPInterface | Where-Object { $_.AddressFamily -eq "Ipv4" -and $_.ifIndex -ne 1 -and $_.InterfaceAlias -notlike "vEthernet*" }).ifIndex
+    if ($SingleNetInterfaceIndex.Count -gt 1) {Throw "More than one network interface, time to debug and add more criteria to the filter"}
     Set-NetIPInterface -InterfaceIndex $SingleNetInterfaceIndex -Dhcp Disabled
     Remove-NetIPAddress -InterfaceIndex $SingleNetInterfaceIndex -AddressFamily IPv4 -Confirm:$false -ErrorAction SilentlyContinue | out-null
     Remove-NetRoute -InterfaceIndex $SingleNetInterfaceIndex -AddressFamily IPv4 -Confirm:$false -ErrorAction SilentlyContinue | out-null
@@ -243,8 +244,9 @@ Function Test-IsAdmin {
 
 Function Install-PowershellWingetClient {
 
-    Install-PackageProvider -Name NuGet -Force | Out-Null
-    Install-Module -Name Microsoft.WinGet.Client -Force -Repository PSGallery | Out-Null
+    powershell.exe -ExecutionPolicy bypass -command {Install-PackageProvider -Name NuGet -Force | Out-Null}
+    powershell.exe -ExecutionPolicy bypass -command {Install-Module -Name Microsoft.WinGet.Client -Force -Repository PSGallery | Out-Null}
+    
 } 
 
 
