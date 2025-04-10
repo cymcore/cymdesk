@@ -104,11 +104,7 @@ Function Add-LocalUserRdpGroup {
         [string]$UserName
 
     )
-    $TestGroupExists = get-localgroup | where-object { $_.name -eq "Remote Desktop Users" }
-    if ($TestGroupExists) {
-        Show-OptionalUserExitAndContinue -Message "Group 'Remote Desktop Users' already exists, skipping operation" -Color Yellow
-        return
-    }
+
     Add-LocalGroupMember -Group "Remote Desktop Users" -Member $UserName -ErrorAction SilentlyContinue
 }
 
@@ -246,7 +242,7 @@ Function Install-PowershellWingetClient {
 
     powershell.exe -ExecutionPolicy bypass -command {Install-PackageProvider -Name NuGet -Force | Out-Null}
     powershell.exe -ExecutionPolicy bypass -command {Install-Module -Name Microsoft.WinGet.Client -Force -Repository PSGallery | Out-Null}
-    
+
 } 
 
 
