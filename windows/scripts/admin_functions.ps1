@@ -6,6 +6,9 @@ $PSNativeCommandUseErrorActionPreference = $true
 
 ### Derived variables
 
+### Source scripts
+. "$PSScriptRoot\scripts\utils_pshelper.ps1"
+
 ### Custom
 
 Function New-LocalUserWithRandomPassword {
@@ -15,6 +18,12 @@ Function New-LocalUserWithRandomPassword {
         [Parameter(Mandatory = $true)]
         [string]$UserDescription
     )
+
+    $TestUserExists = get-localuser | where-object { $_.name -eq $UserName }
+    if ($TestUserExists) {
+        Show-OptionalUserExitAndContinue -Message "User $UserName already exists, skipping operation" -Color Yellow
+        return
+    }
 
     $Password = Get-Random -Minimum 100000000000 -Maximum 999999999999
     $SecureStringPassword = ConvertTo-SecureString $Password -AsPlainText -Force
@@ -94,7 +103,11 @@ Function Add-LocalUserRdpGroup {
         [string]$UserName
 
     )
-
+    $TestGroupExists = get-localgroup | where-object { $_.name -eq "Remote Desktop Users" }
+    if ($TestUserExists) {
+        Show-OptionalUserExitAndContinue -Message "Group 'Remote Desktop Users' already exists, skipping operation" -Color Yellow
+        return
+    }
     Add-LocalGroupMember -Group "Remote Desktop Users" -Member $UserName -ErrorAction SilentlyContinue
 }
 
@@ -103,6 +116,13 @@ function Set-LocalUserEnableAndPassword {
         [Parameter(Mandatory = $true)]
         [string]$UserName
     )
+    
+    $TestUserExists = get-localuser | where-object { $_.name -eq $UserName }
+    if ($TestUserExists) {
+        Show-OptionalUserExitAndContinue -Message "User $UserName already exists, skipping operation" -Color Yellow
+        return
+    }
+
     Enable-LocalUser -Name $UserName
     $securePassword = Read-Host -AsSecureString -Prompt "Enter $UserName password"
     Set-LocalUser -Name $UserName -Password $securePassword 

@@ -6,6 +6,9 @@ $PSNativeCommandUseErrorActionPreference = $true
 
 ### Derived variables
 
+### Source scripts
+. "$PSScriptRoot\scripts\utils_pshelper.ps1"
+
 ### Custom
 
 Function Test-PowershellInstalledModule {
@@ -143,7 +146,7 @@ Function Copy-GitRepo {
         new-item -ItemType Directory -Path $DestinationPath -Force
     }
     else {
-        write-host "Destination path $DestinationPath already exists, skipping clone"
+        Show-OptionalUserExitAndContinue -Message "The destination path $DestinationPath already exists. Skipping git clone operation" -Color Yellow
         return
     }
 
@@ -173,7 +176,7 @@ Function Add-InitialGitConfig {
 
     } 
     else {
-        write-host "Git config already exists for $UserName, skipping"
+        Show-OptionalUserExitAndContinue -Message "Git config already exists for $UserName, skipping operation" -Color Yellow
     }
 }
 
@@ -189,6 +192,7 @@ Function Set-WslInstanceConfiguration {
     if (!($wslInstances -contains $Name)) { Throw "The wsl instance $Name does not exist" }
 
     # Interactive to set user and password 
+    Show-UserKeyPressToContinue -Message "This will enter wsl instance for username and password config (or just enter if configure previously).  This is a interactive operation" -Color Yellow
     wsl.exe -d $Name
 
     # Check if the instance is configured previously
@@ -200,7 +204,7 @@ Function Set-WslInstanceConfiguration {
         $isWslPreviouslyConfigured = $false
     }
     if ($isWslPreviouslyConfigured) {
-        Write-Host "The wsl instance $Name has already been configured previously, skipping"
+        Show-OptionalUserExitAndContinue -Message "The wsl instance $Name has already been configured previously, skipping operation" -Color Yellow
         return
     }
 
@@ -296,7 +300,7 @@ Function Install-WslDistribution {
 
     $wslInstances = wsl.exe --list --quiet
     if ($wslInstances -contains $Name) {
-        Write-Host "The wsl instance $Name already exists, skipping installation"
+        Show-OptionalUserExitAndContinue -Message "The wsl instance $Name already exists, skipping wsl installation" -Color Yellow
         return
     }
 

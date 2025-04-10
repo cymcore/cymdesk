@@ -47,6 +47,7 @@ $LogFile = "c:\cymlogs\host_user_profiles.ps1.error"
 ### Source scripts
 . "$PSScriptRoot\scripts\admin_functions.ps1"
 . "$PSScriptRoot\scripts\user_functions.ps1"
+. "$PSScriptRoot\scripts\utils_pshelper.ps1"
 #if (test-path -path "$PSScriptRoot\scripts\$($env:USERNAME.ToLower()).ps1") {. "$PSScriptRoot\scripts\$($env:USERNAME.ToLower()).ps1"}
 
 ### Profiles
