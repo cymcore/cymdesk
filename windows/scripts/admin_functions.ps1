@@ -132,17 +132,19 @@ function Set-LocalUserEnableAndPassword {
                 if ($Key -eq [ConsoleKey]::y) {
                     write-host("`r")
                     Write-Host "The "y" key pressed, continue to user password prompt..."
+                    $shouldContinue = $true
                     break
                 }
                 if ($Key -eq [ConsoleKey]::n) {
                     write-host("`r")
                     Write-Host "The "n" key pressed, skipping operation..."
-                    return
+                    $shouldContinue = $false
+                    break
                 }
             }
    
         }
-        return
+        if (($shouldContinue -eq $false) -or ($null -eq $shouldContinue)) { return }
     }
 
     Enable-LocalUser -Name $UserName
