@@ -44,7 +44,7 @@ Function Set-StaticIpAddress {
 
     # -Dhcp Disabled parameter in Set-NetIPInterface does not work on a disconnected interface
     $SingleNetInterfaceIndex = (Get-NetIPInterface | Where-Object { $_.AddressFamily -eq "Ipv4" -and $_.ifIndex -ne 1 -and $_.InterfaceAlias -notlike "vEthernet*" }).ifIndex
-    if ($SingleNetInterfaceIndex.Count -gt 1) {Throw "More than one network interface, time to debug and add more criteria to the filter"}
+    if ($SingleNetInterfaceIndex.Count -gt 1) { Throw "More than one network interface, time to debug and add more criteria to the filter" }
     Set-NetIPInterface -InterfaceIndex $SingleNetInterfaceIndex -Dhcp Disabled
     Remove-NetIPAddress -InterfaceIndex $SingleNetInterfaceIndex -AddressFamily IPv4 -Confirm:$false -ErrorAction SilentlyContinue | out-null
     Remove-NetRoute -InterfaceIndex $SingleNetInterfaceIndex -AddressFamily IPv4 -Confirm:$false -ErrorAction SilentlyContinue | out-null
@@ -116,7 +116,32 @@ function Set-LocalUserEnableAndPassword {
 
     $TestUserExists = get-localuser | where-object { $_.name -eq $UserName }
     if ($TestUserExists) {
-        Show-OptionalUserExitAndContinue -Message "User $UserName already exists, skipping operation" -Color Yellow
+        write-host "User $UserName already exists, press 'y' to continue changing password or 'n' (or wait) to skip operation" -ForegroundColor Yellow
+        $timeout = 10
+        while ((++$counter) -lt $timeout) {
+            # Countdown logic and display)
+            if ($($counter) -eq 1) { write-host("$timeout ") -NoNewline } # Downside of initialization of counter in the while loop declaration
+            Start-Sleep -Seconds 1
+            write-host "$($timeout - $counter)  " -NoNewline
+            if ($($timeout - $counter) -eq 1) { write-host("`r") }
+        
+            if ([Console]::KeyAvailable) {
+                # A key was pressed, check if it's the Enter and Spacebar key
+                $Key = [Console]::ReadKey($true).Key
+        
+                if ($Key -eq [ConsoleKey]::y) {
+                    write-host("`r")
+                    Write-Host "The "y" key pressed, continue to user password prompt..."
+                    break
+                }
+                if ($Key -eq [ConsoleKey]::n) {
+                    write-host("`r")
+                    Write-Host "The "n" key pressed, skipping operation..."
+                    return
+                }
+            }
+   
+        }
         return
     }
 
@@ -240,8 +265,8 @@ Function Test-IsAdmin {
 
 Function Install-PowershellWingetClient {
 
-    powershell.exe -ExecutionPolicy bypass -command {Install-PackageProvider -Name NuGet -Force | Out-Null}
-    powershell.exe -ExecutionPolicy bypass -command {Install-Module -Name Microsoft.WinGet.Client -Force -Repository PSGallery | Out-Null}
+    powershell.exe -ExecutionPolicy bypass -command { Install-PackageProvider -Name NuGet -Force | Out-Null }
+    powershell.exe -ExecutionPolicy bypass -command { Install-Module -Name Microsoft.WinGet.Client -Force -Repository PSGallery | Out-Null }
 
 } 
 
