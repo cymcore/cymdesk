@@ -229,10 +229,7 @@ Function Install-PowershellWingetClient {
 
 
 Function Update-Winget {
-    param (
-        [Parameter(Mandatory = $true)]
-        [string]$WingetFilePath
-    )
+
     $WingetFilePath = "C:\Users\$($env:USERNAME)\AppData\Local\Microsoft\WindowsApps\winget.exe"
     
     # Check if winget is installed
