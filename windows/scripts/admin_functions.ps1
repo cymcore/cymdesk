@@ -104,7 +104,7 @@ Function Add-LocalUserRdpGroup {
 
     )
     $TestGroupExists = get-localgroup | where-object { $_.name -eq "Remote Desktop Users" }
-    if ($TestUserExists) {
+    if ($TestGroupExists) {
         Show-OptionalUserExitAndContinue -Message "Group 'Remote Desktop Users' already exists, skipping operation" -Color Yellow
         return
     }
