@@ -245,7 +245,7 @@ Function Update-Winget {
     Repair-WinGetPackageManager -Force -Latest
 }
 
-Set-InitialWingetEnvironment {
+Function Set-InitialWingetEnvironment {
     $WingetFilePath = "C:\Users\$($env:USERNAME)\AppData\Local\Microsoft\WindowsApps\winget.exe"
     
     # After windows sysadmin loads wait for winget to be installed
