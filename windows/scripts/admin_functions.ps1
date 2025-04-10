@@ -7,7 +7,7 @@ $PSNativeCommandUseErrorActionPreference = $true
 ### Derived variables
 
 ### Source scripts
-. "$PSScriptRoot\scripts\utils_pshelper.ps1"
+. "./utils_pshelper.ps1"
 
 ### Custom
 
@@ -116,7 +116,7 @@ function Set-LocalUserEnableAndPassword {
         [Parameter(Mandatory = $true)]
         [string]$UserName
     )
-    
+
     $TestUserExists = get-localuser | where-object { $_.name -eq $UserName }
     if ($TestUserExists) {
         Show-OptionalUserExitAndContinue -Message "User $UserName already exists, skipping operation" -Color Yellow

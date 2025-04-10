@@ -7,7 +7,7 @@ $PSNativeCommandUseErrorActionPreference = $true
 ### Derived variables
 
 ### Source scripts
-. "$PSScriptRoot\scripts\utils_pshelper.ps1"
+. "./utils_pshelper.ps1"
 
 ### Custom
 
