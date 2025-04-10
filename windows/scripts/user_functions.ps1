@@ -194,10 +194,10 @@ Function Set-WslInstanceConfiguration {
     # Check if the instance is configured previously
     try {
         wsl.exe -d $Name --user root stat /root/.cym_bashrc
-        isWslPreviouslyConfigured = $true
+         $isWslPreviouslyConfigured = $true
     }
     catch {
-        isWslPreviouslyConfigured = $false
+        $isWslPreviouslyConfigured = $false
     }
     if ($isWslPreviouslyConfigured) {
         Write-Host "The wsl instance $Name has already been configured previously, skipping"
