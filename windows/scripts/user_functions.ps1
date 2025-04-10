@@ -191,11 +191,26 @@ Function Set-WslInstanceConfiguration {
     # Interactive to set user and password 
     wsl.exe -d $Name
 
-    wsl.exe -d $Name --user root stat /root/.cym_bashrc
-    if ($LASTEXITCODE -ne 0) { Throw "Wsl instance had already been configured previously" }
+    # Check if the instance is configured previously
+    try {
+        wsl.exe -d $Name --user root stat /root/.cym_bashrc
+        isWslPreviouslyConfigured = $true
+    }
+    catch {
+        isWslPreviouslyConfigured = $false
+    }
+    if ($isWslPreviouslyConfigured) {
+        Write-Host "The wsl instance $Name has already been configured previously, skipping"
+        return
+    }
 
-    wsl.exe -d $Name --user root ls $InstanceCymdeskPath
-    if ($LASTEXITCODE -ne 0) { Throw "cymdesk inside the wsl instance not found" }
+    try {
+        wsl.exe -d $Name --user root ls $InstanceCymdeskPath
+    }
+    catch {
+        Throw "The cymdesk path $InstanceCymdeskPath does not exist in the wsl instance $Name"
+    }
+
 
     wsl.exe -d $Name --user root find $InstanceCymdeskPath -type f -name `"*.sh`"
     wsl.exe -d $Name --user root $InstanceCymdeskPath/wsl/host_user_profiles.sh --wslName=$Name --initWsl=true
