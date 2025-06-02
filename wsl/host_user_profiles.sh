@@ -70,6 +70,7 @@ wsl_base() {
 
     done
 
+    # Start installing pacakages
     InstallMicrosoftPackageRepo
     apt update
 
@@ -121,13 +122,12 @@ wsl_base() {
         declare -A userDetail
         GetDictionaryItemFromArrayItem "$userItem" userDetail
         AddKateNotepadToCymBashrc --userName=${userDetail[name]}
-
     done
 
+    # Install nvidia container toolkit if var is set
     if [ ! -z "$installNvContainerToolkit" ]; then
         InstallNvidiaContainerToolkit --backend=$installNvContainerToolkit
     fi
-
     
 }
 
@@ -183,6 +183,8 @@ windev__main__ptimme01() {
     done
 
     InstallMiniConda
+
+    AddPconToCymBashrc --userName=ptimme01
 }
 
 init__north__main__root() {
@@ -240,6 +242,8 @@ north__main__ptimme01() {
     done
 
     InstallMiniConda
+
+    AddPconToCymBashrc --userName=ptimme01
 }
 
 ### Set HostUserProfile (depends on if called with -Init) and runs function
