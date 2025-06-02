@@ -113,6 +113,7 @@ $windev__ptimme01 = @{
     340 = { Install-WslDistribution -DistroName "Ubuntu-24.04" -Name main }
     345 = { Copy-GitRepo -GitRepoUrl "https://github.com/cymcore/cymdesk.git" -DestinationPath "C:\xfer\cymdesk" }
     350 = { Set-WslInstanceConfiguration -Name main -UserName ptimme01 -InstanceCymdeskPath "/mnt/c/xfer/cymdesk" }
+    380 = { Install-WingetApp -Id Anaconda.Miniconda3 ; Set-Location -Path C:\Users\$env:username\miniconda3\condabin; ./conda init }
     600 = { Set-WindowsSystemAndAppDarkMode ; Set-WindowsFileExplorerHideFileExtensions -HideFileNameExtensions $false ; Set-WindowsFileExplorerShowHiddenItems -ShowHiddenItems $true }
 }
 
