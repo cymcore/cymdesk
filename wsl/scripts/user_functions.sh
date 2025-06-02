@@ -90,12 +90,16 @@ EOF
 }
 
 InstallMiniConda() {
-    if [ "$EUID" -ne 0 ]; then
-        wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda-installer.sh
-        bash /tmp/miniconda-installer.sh -b
-        /home/$USER/miniconda3/bin/conda init
-        /home/$USER/miniconda3/bin/conda config --set auto_activate_base false
+    if [ ! -d /home/$USER/miniconda3 ]; then
+        if [ "$EUID" -ne 0 ]; then
+            wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda-installer.sh
+            bash /tmp/miniconda-installer.sh -b
+            /home/$USER/miniconda3/bin/conda init
+            /home/$USER/miniconda3/bin/conda config --set auto_activate_base false
+        fi
     fi
+
+
 
 }
 
@@ -155,3 +159,30 @@ EOF
 
 }
 
+AddPconToCymBashrc() {
+    local userName=""
+  
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --userName=*) userName="${1#*=}" ;;
+            *) echo "Unknown option: $1"; return 1 ;;
+        esac
+        shift
+    done
+
+    if [[ $userName == "root" ]]; then
+        cymBashrcFile="/root/.cym_bashrc"
+    else
+        cymBashrcFile="/home/$userName/.cym_bashrc"
+    fi
+
+    if ! grep pcon $cymBashrcFile; then
+    cat << 'EOF' >> $cymBashrcFile
+pcon() {
+    podman exec -it "$@" /bin/bash
+}
+
+EOF
+    fi
+
+}
