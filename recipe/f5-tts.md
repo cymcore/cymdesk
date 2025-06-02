@@ -25,8 +25,9 @@ f5-tts_infer-cli --model F5TTS_v1_Base \
 --ref_text "The content, subtitle or transcription of reference audio." \
 --gen_text "Some text you want TTS model generate for you."
 
-
-
+### in windows
+conda install ffmpeg
+f5-tts_infer-gradio --port 7860 --host 127.0.0.1
 .NOTES
 
 .STEPS

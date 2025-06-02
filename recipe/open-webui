@@ -1,0 +1,23 @@
+podman run -itd --network ollama --device $(nvidia-ctk cdi list|grep nvidia) -p 11435:8080 -v /mnt/c/Users/ptimme01/podman_data/open-webui/data: -v /mnt/c/xfer:/xfer --hostname open-webui --name open-webui nvidia/cuda:12.6.3-cudnn-devel-ubuntu24.04 /bin/bash
+
+podman exec -it open-webui /bin/bash
+
+apt update
+
+apt install -y build-essential wget curl nano tmux
+
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda-installer.sh
+bash /tmp/miniconda-installer.sh -b
+/root/miniconda3/bin/conda init
+
+<restart container>
+podman restart open-webui
+podman exec -it open-webui /bin/bash
+
+conda create -y --name open-webui python=3.11
+conda activate open-webui
+
+conda install -y ffmpeg
+pip install open-webui
+
+open-webui serve
