@@ -6,27 +6,27 @@
 # remember podman container break out results in the host user that ran the podman container
 
 # Defined variables
-container_name="pythonplay"
+container_name="rpgcomp"
 container_from_image="docker.io/library/ubuntu:24.04"
-# multiple bind mounts example "-v /mnt/c/xfer/:/xfer/ -v /mnt/c/Users/ptimme01/OneDrive/vol1/scm/play/pythonplay/:/app/"
-container_volumes="-v /home/ptimme01/scm/pythonplay:/app"
+#container_volumes="-v /mnt/c/xfer/:/xfer/ -v /mnt/c/Users/ptimme01/OneDrive/vol1/scm/play/pythonplay/:/app/"
+container_volumes="-v /home/ptimme01/scm/rpgcomp:/home/ptimme01/scm/rpgcomp/"
 container_options="-itd"
 container_entrypoint="/bin/bash"
 image_version="v1"
 # for a root container, set the username to root, uid and gid to zero, and home to /root
-username="root"
-home_path="/root"
-user_uid="0"
-user_gid="0"
-git_username="ptimmerman01"
-git_email="ptimmerman01@outlook.com"
+username="ptimme01"
+home_path="/home/ptimme01"
+user_uid="2001"
+user_gid="2001"
+git_username="ptimme01"
+git_email="ptimme01@outlook.com"
 apt_packages=""
-conda_env_name="pythonplay"
+conda_env_name="rpgcomp"
 conda_env_version="3.10"
 additional_dockerfile_commands=$(cat << EOF
 # Appends to the Dockerfile during Create-DockerfileStage3
 
-WORKDIR /app
+WORKDIR $home_path/scm/rpgcomp
 
 EOF
 )
