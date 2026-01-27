@@ -103,7 +103,7 @@ else {
 }
 $WinautoStage1File = "$WinAutoDir\winauto-stage1.ps1"
 $WinautoStage2File = "$WinAutoDir\winauto-stage2.ps1"
-$WinAutoComputerFile = "$WinAutoDir\$env:COMPUTERNAME.ps1"
+$WinAutoComputerFile = "$WinAutoDir\$($env:COMPUTERNAME.ToLower()).ps1"
 # Source Dependent Scripts
 if ($env:CYMDESKPATH) {
     $CymdeskLocation = $env:CYMDESKPATH
@@ -202,7 +202,7 @@ Function Invoke-WinAutoRun {
     if (test-path -Path $WinAutoComputerFile) { Remove-Item -Path $WinAutoComputerFile }
     try {
         if (!(Test-Path -Path $WinAutoComputerFile)) {
-            $RawUrl = "$GithubUrl/$env:COMPUTERNAME.ps1"
+            $RawUrl = "$GithubUrl/$($env:COMPUTERNAME.ToLower()).ps1"
             $OutputPath = $WinAutoComputerFile
             Get-WebFile -RawUrl $RawUrl -OutputPath $OutputPath
         }
