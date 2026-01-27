@@ -45,7 +45,7 @@ $CymdeskLocation = "C:\cymdesk"
 ### Common
 
 # Create common directories
-New-Item -Path 'C:\Temp' -ItemType Directory
+if (!(Test-Path -Path 'C:\Temp')) { New-Item -Path 'C:\Temp' -ItemType Directory }
 
 # Download git portable, extract and install it, clone cymdesk repository, change permissions
 if (!(Test-Path -Path $CymdeskLocation)) { New-Item -Path $CymdeskLocation -ItemType Directory }
@@ -56,6 +56,7 @@ icacls $CymdeskLocation /inheritance:d
 icacls $CymdeskLocation /remove "Authenticated Users"
 
 [System.Environment]::SetEnvironmentVariable('CYMDESKPATH', $CymdeskLocation, [System.EnvironmentVariableTarget]::Machine)
+# Set in current session
 $env:CYMDESKPATH = [System.Environment]::GetEnvironmentVariable("CYMDESKPATH", "Machine")
 
 # Install winauto
