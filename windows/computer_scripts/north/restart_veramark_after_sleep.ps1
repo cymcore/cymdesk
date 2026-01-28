@@ -63,7 +63,7 @@ if (!(Test-Path -Path $LogDir)) { New-Item -Path $LogDir -ItemType Directory }
 $StartMessage = "$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss") - Restart Veramark after sleep script started."
 "$StartMessage" | Out-File -FilePath $LogFile -Append
 # Give USB time to enumerate after wake from sleep
-Start-Sleep -Seconds 10
+Start-Sleep -Seconds 12
 # Find Verimark fingerprint devices
 $device = Get-PnpDevice |
 Where-Object {
