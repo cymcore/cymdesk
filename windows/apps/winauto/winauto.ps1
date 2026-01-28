@@ -174,6 +174,7 @@ Function Install-WinAuto {
 }
 
 Function Invoke-WinAutoRunTrigger {
+    # Create event log entry to trigger the run scheduled task, but does not require admin privs
     New-EventLogEntry -LogName $LogName -LogSource $LogSource -LogEventID 150 -LogEntryType (Get-LogIdMetadata(150)).LogEntryType -LogMessage (Get-LogIdMetadata(150)).LogMessage
 
 }
@@ -289,8 +290,11 @@ Function Update-WinAuto {
     }
 
     if ($shouldUpdate) {
-        $UpdateCommand = { start-sleep -seconds 10 ; remove-item -Path "$using:WinAutoDir\winauto.ps1" -force ; rename-item -Path "$using:WinAutoDir\winauto.ps1.new" -NewName "$using:WinAutoDir\winauto.ps1" }
-        Start-Job -ScriptBlock $UpdateCommand 
+        # Start an independent process to swap the files after exit of this script
+        # Could do better and look somehow for running instances of winauto.ps1 and wait for them to exit
+        # But for now it's at the very end so just wait 10 seconds
+        $UpdateCommand = "& { start-sleep -seconds 10 ; remove-item -Path $WinAutoDir\winauto.ps1 -force ; rename-item -Path $WinAutoDir\winauto.ps1.new -NewName $WinAutoDir\winauto.ps1 }"
+        Start-Process powershell.exe -ArgumentList "-NoProfile -Command $UpdateCommand"
         New-EventLogEntry -LogName $LogName -LogSource $LogSource -LogEventID 107 -LogEntryType (Get-LogIdMetadata(107)).LogEntryType -LogMessage (Get-LogIdMetadata(107)).LogMessage
         exit 0
     }
