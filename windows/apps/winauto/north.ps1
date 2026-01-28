@@ -34,7 +34,7 @@ Function Show-ErrorAndStackTrace {
 }
 
 ### Defined variables
-$LogFile = "C:\cymlogs\winauto_north.ps1.error"
+$LogFile = "C:\cymlogs\north.ps1.error"
 ### Derived variables
 if (!($env:CYMDESKPATH)) { Throw "CYMDESKPATH environment variable is not set. Cannot proceed." }
 $CymdeskLocation = $env:CYMDESKPATH
