@@ -72,7 +72,7 @@ $StartMessage = "$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss") - Restart Veramark af
 "$StartMessage" | Out-File -FilePath $RunLogFile -Append
 
 # Give USB time to enumerate after wake from sleep - retry up to 20 times
-Start-Sleep -Seconds 8
+Start-Sleep -Seconds 4
 $device = $null
 $maxRetries = 20
 $retryCount = 0
@@ -94,7 +94,7 @@ if (-not $device) {
 
 foreach ($d in $device) {
     Disable-PnpDevice -InstanceId $d.InstanceId -Confirm:$false
-    Start-Sleep -Seconds 3
+    Start-Sleep -Seconds 4
     Enable-PnpDevice -InstanceId $d.InstanceId -Confirm:$false
 }
 
