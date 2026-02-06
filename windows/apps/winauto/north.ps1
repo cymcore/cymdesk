@@ -76,6 +76,6 @@ Function New-VermarkRestartScheduledTask {
     }
 }
 
-# New-VermarkRestartScheduledTask
+New-VermarkRestartScheduledTask
 
 
