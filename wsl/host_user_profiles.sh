@@ -202,6 +202,8 @@ init__north__main__root() {
 
     aptPackages=(
         "package=podman"
+        "package=podman-docker"
+        "package=waypipe"
         "package=flatpak"
         "package=thunar"
         "package=powershell"
@@ -244,6 +246,8 @@ north__main__ptimme01() {
     InstallMiniConda
 
     AddPconToCymBashrc --userName=ptimme01
+
+    AddCymAppLauncherConnect --userName=ptimme01
 }
 
 ### Set HostUserProfile (depends on if called with -Init) and runs function

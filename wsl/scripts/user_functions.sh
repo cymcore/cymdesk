@@ -186,3 +186,47 @@ EOF
     fi
 
 }
+
+AddCymAppLauncherConnect() {
+    local userName=""
+  
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --userName=*) userName="${1#*=}" ;;
+            *) echo "Unknown option: $1"; return 1 ;;
+        esac
+        shift
+    done
+
+    if [[ $userName == "root" ]]; then
+        cymBashrcFile="/root/.cym_bashrc"
+    else
+        cymBashrcFile="/home/$userName/.cym_bashrc"
+    fi
+
+    if ! grep cymapplauncherclient $cymBashrcFile; then
+    cat << 'EOF' >> $cymBashrcFile
+cymapplauncherclient() {
+
+    if ! command -v waypipe >/dev/null 2>&1; then
+        echo "Error: waypipe is not installed or not in PATH."
+        return 1
+    fi
+
+
+    if [ "$#" -ne 1 ]; then
+        echo "Usage: cymapplauncherclient <ssh_host>"
+        return 1
+    fi
+
+    cp /mnt/c/Users/$USER/.ssh/$1/$USER/current/id_ed25519 ~/$1.priv
+    chown $USER:$USER ~/$1.priv
+    chmod 600 ~/$1.priv
+    waypipe ssh -i ~/$1.priv $USER@$1.cymcore.com cym_app_launcher_waypipe
+    rm ~/$1.priv
+}
+
+EOF
+    fi
+
+}
