@@ -74,7 +74,10 @@ Function Deploy-OsImage {
         [string]$SystemDriveLetter
     )
 
-    $WindowsImagePath = ($WindowsIsoDriveLetter + ":\sources\install.wim")
+
+    ##TODO : Add support for install.esd which is a compressed version of install.wim and requires different handling.  E.g. Get-WindowsImage -ImagePath h:\sources\install.esd 
+    #$WindowsImagePath = ($WindowsIsoDriveLetter + ":\sources\install.wim")
+    $WindowsImagePath = ($WindowsIsoDriveLetter + ":\sources\install.esd")
     $WindowsImageIndex = (Get-WindowsImage -ImagePath $WindowsImagePath | Where-Object { $_.ImageName -eq $WindowsImageName }).ImageIndex
     Expand-WindowsImage -ImagePath $WindowsImagePath -Index $WindowsImageIndex -ApplyPath ($WindowsDriveLetter + ":\")
     bcdboot ($WindowsDriveLetter + ":\Windows") /s ($SystemDriveLetter + ":") /f UEFI
