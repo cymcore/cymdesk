@@ -71,9 +71,7 @@ Function Add-GpuVmPartitionAdapter {
     
     Set-VmConfigForGpuPartition -VmName $VmName
 
-    $GpuName = Get-GpuVmPartitionAdapterName
-    
-    if ($GpuName -eq "AUTO") {
+    if (Test-IsWindows10) {
         Add-VMGpuPartitionAdapter -VMName $VmName
     }
     else {
