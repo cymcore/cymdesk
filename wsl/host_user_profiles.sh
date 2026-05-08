@@ -187,6 +187,62 @@ windev__main__ptimme01() {
     AddPconToCymBashrc --userName=ptimme01
 }
 
+init__wintst__main__root() {
+
+    osGroups=(
+        "name=duo_sudo;id=3000"
+        "name=duo_users;id=3001"
+        "name=docker;id=3002"
+    )
+    
+    osUsers=(
+        "name=root;id=0;desc=Root;groups=root;email=root@cymcore.com"
+        "name=ptimme01;id=1000;desc=Paul Timmerman;groups=docker,users;email=ptimme01@outlook.com"
+    )
+
+    aptPackages=(
+        "package=podman"
+        "package=flatpak"
+        "package=thunar"
+        "package=powershell"
+        "package=pciutils"
+        "package=build-essential"
+    )
+
+    flatpakPackages=(
+        "package=com.github.tchx84.Flatseal;alias=flatseal"
+        "package=com.usebottles.bottles;alias=bottles"
+        "package=org.kde.okular;alias=okular"
+        "package=org.kde.kate;alias=kate"
+    )
+    
+    # A 1 means install docker, 0 means don't install
+    installDocker=1
+    
+    wsl_base
+    
+}
+
+wintst__main__ptimme01() {
+
+    dboxApps=(
+        "app=chrome;image=quay.io/fedora/fedora:41;username=ptimme01"
+        "app=edge;image=quay.io/fedora/fedora:41;username=ptimme01"
+    )
+
+    for dboxItem in "${dboxApps[@]}"; do 
+        declare -A dboxDetail
+        GetDictionaryItemFromArrayItem "$dboxItem" dboxDetail
+        CreateDboxApp --app=${dboxDetail[app]} --image=${dboxDetail[image]}
+        ConfigureDboxApp --app=${dboxDetail[app]} --username=${dboxDetail[username]} 
+        
+    done
+
+    InstallMiniConda
+
+    AddPconToCymBashrc --userName=ptimme01
+}
+
 init__north__main__root() {
 
     osGroups=(
