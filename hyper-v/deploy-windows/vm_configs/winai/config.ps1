@@ -1,7 +1,7 @@
 
 # WindowsImageName must match the exactly so index can be found.  E.g. Get-WindowsImage -ImagePath h:\sources\install.wim
 $windows_iso = @{
-    WindowsIsoPath = "D:\sec_source\Win11_24H2_English_x64.iso"
+    WindowsIsoPath = "D:\sec_source\Win11_25H2_English_x64.iso"
     WindowsImageName = "Windows 11 Pro"
 }
 $vm_config = @{
