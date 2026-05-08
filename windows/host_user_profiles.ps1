@@ -128,6 +128,7 @@ $init__wintst__sysadmin = @{
     302 = { Install-WingetApp -Id Microsoft.PowerShell -CustomArgs "--source winget" }
     800 = { powershell.exe -executionpolicy bypass -file $env:AUTOWINPATH\winauto.ps1 -action trigger ; powershell.exe -executionpolicy bypass -command "Start-Sleep -Seconds 10" }
     900 = { Restart-Computer -Force }
+}
 
 $wintst__sysadmin = @{
     100 = { if (!(Test-IsAdmin)) { Throw "Must run with elevated privs" } }
