@@ -134,6 +134,36 @@ Function Install-Wsl {
     wsl --install --no-distribution
 }
 
+Function Install-MsiPackage {
+    param (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [string]$MsiPath,
+        [string]$AdditionalArguments
+    )
+
+    # Complex example: Install-MsiPackage -MsiPath "C:\temp\myapp.msi" -AdditionalArguments '/L*v "C:\temp\my install.log" TRANSFORMS="C:\temp\my transform.mst"'
+
+    if (!(Test-Path -Path $MsiPath)) {
+        throw "MSI file not found: $MsiPath"
+    }
+
+    if ([System.IO.Path]::GetExtension($MsiPath) -ne ".msi") {
+        throw "File must be an .msi package: $MsiPath"
+    }
+
+    $ResolvedMsiPath = (Resolve-Path -Path $MsiPath).Path
+    $ArgumentList = "/i `"$ResolvedMsiPath`" /qn /norestart"
+    if ($AdditionalArguments) {
+        $ArgumentList = "$ArgumentList $AdditionalArguments"
+    }
+
+    $Process = Start-Process -FilePath "msiexec.exe" -ArgumentList $ArgumentList -Wait -NoNewWindow -PassThru
+    if ($Process.ExitCode -notin @(0, 1641, 3010)) {
+        throw "MSI install failed for $ResolvedMsiPath with exit code $($Process.ExitCode)"
+    }
+}
+
 
 Function Add-LocalUserRdpGroup {
     param(
@@ -382,3 +412,4 @@ Function Set-RdpFirewallRuleAllowIp {
         -RemoteAddress $NormalizedIpAddresses `
         -Enabled True
 }
+

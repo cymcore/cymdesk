@@ -166,6 +166,7 @@ $north__ptimme01 = @{
 $init__wincraft1__sysadmin = @{
     100 = { Set-StaticIpAddress -JsonFile "C:\Windows\Setup\Scripts\ansible_host_config.json" }
     120 = { Set-DnsServerAddresses -JsonFile "C:\Windows\Setup\Scripts\ansible_host_config.json" }
+    130 = { Install-MsiPackage -MsiPath "C:\Windows\Setup\Scripts\qemu-ga-x86_64.msi" }
     140 = { Set-RdpOn }
     141 = { Set-RdpFirewallRuleAllowIp -JsonFile "C:\Windows\Setup\Scripts\ansible_host_config.json" }
     160 = { New-LocalSmbShare -DirPath "C:\xfer" -ShareName "xfer" }
