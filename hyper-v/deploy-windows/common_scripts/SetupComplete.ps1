@@ -69,4 +69,8 @@ $uacSetting = "ConsentPromptBehaviorAdmin"
 Set-ItemProperty -Path $regPath -Name $uacSetting -Value 0 -Force
 
 # Delete autoattend file
-Remove-Item -Path "C:\unattend.xml" -Force
+$unattendPath = "C:\unattend.xml"
+
+if (Test-Path -LiteralPath $unattendPath) {
+    Remove-Item -LiteralPath $unattendPath -Force
+}
