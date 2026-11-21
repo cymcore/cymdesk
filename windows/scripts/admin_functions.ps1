@@ -33,14 +33,37 @@ Function New-LocalUserWithRandomPassword {
 }
 
 Function Set-StaticIpAddress {
+    [CmdletBinding(DefaultParameterSetName = "IpParameters")]
     param (
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true, ParameterSetName = "IpParameters")]
+        [ValidateNotNullOrEmpty()]
         [string]$IpAddress,
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true, ParameterSetName = "IpParameters")]
+        [ValidateNotNullOrEmpty()]
         [string]$IpSubnetMask,
-        [Parameter(Mandatory = $true)]
-        [string]$IpGateway
+        [Parameter(Mandatory = $true, ParameterSetName = "IpParameters")]
+        [ValidateNotNullOrEmpty()]
+        [string]$IpGateway,
+        [Parameter(Mandatory = $true, ParameterSetName = "JsonFile")]
+        [ValidateNotNullOrEmpty()]
+        [string]$JsonFile
     )
+
+    if ($PSCmdlet.ParameterSetName -eq "JsonFile") {
+        $JsonContent = Get-Content -Path $JsonFile -Raw | ConvertFrom-Json
+
+        if (
+            [string]::IsNullOrWhiteSpace($JsonContent.IpAddress) -or
+            [string]::IsNullOrWhiteSpace($JsonContent.IpSubnetMask) -or
+            [string]::IsNullOrWhiteSpace($JsonContent.IpGateway)
+        ) {
+            throw "JsonFile must contain IpAddress, IpSubnetMask, and IpGateway properties."
+        }
+
+        $IpAddress = $JsonContent.IpAddress
+        $IpSubnetMask = $JsonContent.IpSubnetMask
+        $IpGateway = $JsonContent.IpGateway
+    }
 
     # -Dhcp Disabled parameter in Set-NetIPInterface does not work on a disconnected interface
     $SingleNetInterfaceIndex = (Get-NetIPInterface | Where-Object { $_.AddressFamily -eq "Ipv4" -and $_.ifIndex -ne 1 -and $_.InterfaceAlias -notlike "vEthernet*" }).ifIndex
@@ -52,11 +75,25 @@ Function Set-StaticIpAddress {
 }
 
 Function Set-DnsServerAddresses {
+    [CmdletBinding(DefaultParameterSetName = "DnsServers")]
     param (
-        [Parameter(Mandatory = $true)]
-        [array]$DNSServers
-    
+        [Parameter(Mandatory = $true, ParameterSetName = "DnsServers")]
+        [ValidateNotNullOrEmpty()]
+        [string[]]$DNSServers,
+        [Parameter(Mandatory = $true, ParameterSetName = "JsonFile")]
+        [ValidateNotNullOrEmpty()]
+        [string]$JsonFile
     )
+
+    if ($PSCmdlet.ParameterSetName -eq "JsonFile") {
+        $JsonContent = Get-Content -Path $JsonFile -Raw | ConvertFrom-Json
+        $DNSServers = @($JsonContent.DnsServers)
+
+        if ($DNSServers.Count -eq 0) {
+            throw "JsonFile must contain a DnsServers element with at least one DNS server."
+        }
+    }
+
     $SingleNetInterfaceIndex = (Get-NetIPInterface | Where-Object { $_.AddressFamily -eq "Ipv4" -and $_.ifIndex -ne 1 }).ifIndex
     Set-DnsClientServerAddress -InterfaceIndex  $SingleNetInterfaceIndex -ServerAddresses $DNSServers 
 }
@@ -303,4 +340,45 @@ Function Set-InitialWingetEnvironment {
     Install-PowershellWingetClient
     Update-Winget
 
+}
+
+Function Set-RdpFirewallRuleAllowIp {
+    [CmdletBinding(DefaultParameterSetName = "IpAddresses")]
+    param (
+        [Parameter(Mandatory = $true, ParameterSetName = "IpAddresses")]
+        [ValidateNotNullOrEmpty()]
+        [string[]]$IpAddresses,
+        [Parameter(Mandatory = $true, ParameterSetName = "JsonFile")]
+        [ValidateNotNullOrEmpty()]
+        [string]$JsonFile
+    )
+
+    if ($PSCmdlet.ParameterSetName -eq "JsonFile") {
+        $JsonContent = Get-Content -Path $JsonFile -Raw | ConvertFrom-Json
+        $IpAddresses = @($JsonContent.RdpAllowIpAddresses)
+
+        if ($IpAddresses.Count -eq 0) {
+            throw "JsonFile must contain a RdpAllowIpAddresses property with at least one IP address."
+        }
+    }
+
+    $NormalizedIpAddresses = foreach ($IpAddress in $IpAddresses) {
+        if ([string]::IsNullOrWhiteSpace($IpAddress)) {
+            throw "RdpAllowIpAddresses cannot contain an empty IP address."
+        }
+
+        $ParsedAddress = $null
+        if (-not [System.Net.IPAddress]::TryParse($IpAddress, [ref]$ParsedAddress)) {
+            throw "Invalid IP address: '$IpAddress'"
+        }
+
+        $ParsedAddress.ToString()
+    }
+
+    $NormalizedIpAddresses = $NormalizedIpAddresses | Select-Object -Unique
+
+    Set-NetFirewallRule `
+        -DisplayGroup "Remote Desktop" `
+        -RemoteAddress $NormalizedIpAddresses `
+        -Enabled True
 }
