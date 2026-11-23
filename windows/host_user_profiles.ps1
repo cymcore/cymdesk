@@ -166,7 +166,6 @@ $north__ptimme01 = @{
 $init__wincraft1__sysadmin = @{
     100 = { Set-StaticIpAddress -JsonFile "C:\Windows\Setup\Scripts\ansible_host_config.json" }
     120 = { Set-DnsServerAddresses -JsonFile "C:\Windows\Setup\Scripts\ansible_host_config.json" }
-    130 = { Install-MsiPackage -MsiPath "C:\Windows\Setup\Scripts\qemu-ga-x86_64.msi" }
     140 = { Set-RdpOn }
     141 = { Set-RdpFirewallRuleAllowIp -JsonFile "C:\Windows\Setup\Scripts\ansible_host_config.json" }
     160 = { New-LocalSmbShare -DirPath "C:\xfer" -ShareName "xfer" }
@@ -174,10 +173,25 @@ $init__wincraft1__sysadmin = @{
     300 = { Set-InitialWingetEnvironment }
     301 = { Install-WingetApp -Id git.git -CustomArgs "--scope machine" }
     302 = { Install-WingetApp -Id Microsoft.PowerShell -CustomArgs "--source winget" }
+    320 = { Install-MsiPackage -MsiPath "C:\Windows\Setup\Scripts\qemu-ga-x86_64.msi" -WingetDetectionString "qemu guest agent" }
     800 = { powershell.exe -executionpolicy bypass -file $env:AUTOWINPATH\winauto.ps1 -action trigger ; powershell.exe -executionpolicy bypass -command "Start-Sleep -Seconds 10" }
     900 = { Restart-Computer -Force }
 }
 
+$init__prdp1__sysadmin = @{
+    100 = { Set-StaticIpAddress -JsonFile "C:\Windows\Setup\Scripts\ansible_host_config.json" }
+    120 = { Set-DnsServerAddresses -JsonFile "C:\Windows\Setup\Scripts\ansible_host_config.json" }
+    140 = { Set-RdpOn }
+    141 = { Set-RdpFirewallRuleAllowIp -JsonFile "C:\Windows\Setup\Scripts\ansible_host_config.json" }
+    160 = { New-LocalSmbShare -DirPath "C:\xfer" -ShareName "xfer" }
+    190 = { Set-AutoLogonCountFix }
+    300 = { Set-InitialWingetEnvironment }
+    301 = { Install-WingetApp -Id git.git -CustomArgs "--scope machine" }
+    302 = { Install-WingetApp -Id Microsoft.PowerShell -CustomArgs "--source winget" }
+    320 = { Install-MsiPackage -MsiPath "C:\Windows\Setup\Scripts\qemu-ga-x86_64.msi" -WingetDetectionString "qemu guest agent" }
+    800 = { powershell.exe -executionpolicy bypass -file $env:AUTOWINPATH\winauto.ps1 -action trigger ; powershell.exe -executionpolicy bypass -command "Start-Sleep -Seconds 10" }
+    900 = { Restart-Computer -Force }
+}
 ### Set HostUserProfile (depends on if called with -Init)
 if ($Init) {
     $HostUserProfile = get-variable -name "init__$($env:COMPUTERNAME.ToLower())__$($env:USERNAME.ToLower())" -ErrorAction SilentlyContinue -ValueOnly

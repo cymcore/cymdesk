@@ -139,10 +139,28 @@ Function Install-MsiPackage {
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [string]$MsiPath,
-        [string]$AdditionalArguments
+        [string]$AdditionalArguments,
+        [string]$WingetDetectionString
     )
 
     # Complex example: Install-MsiPackage -MsiPath "C:\temp\myapp.msi" -AdditionalArguments '/L*v "C:\temp\my install.log" TRANSFORMS="C:\temp\my transform.mst"'
+
+    if ($WingetDetectionString) {
+        if (!(Get-Command -Name "winget" -ErrorAction SilentlyContinue)) {
+            throw "winget is not available, but WingetDetectionString was specified: $WingetDetectionString"
+        }
+
+        $WingetOutput = @(winget list)
+        if ($LASTEXITCODE -ne 0) {
+            throw "winget list failed with exit code $LASTEXITCODE"
+        }
+
+        $IsWingetListed = $WingetOutput | Select-String -Pattern $WingetDetectionString -SimpleMatch -Quiet
+        if ($IsWingetListed) {
+            Write-Host "$WingetDetectionString is already installed according to winget. Skipping MSI installation."
+            return
+        }
+    }
 
     if (!(Test-Path -Path $MsiPath)) {
         throw "MSI file not found: $MsiPath"
